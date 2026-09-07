@@ -10,6 +10,19 @@ const phaseTone: Record<string, string> = {
   Delivery: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
 };
 
+const stageTone: Record<string, { border: string; bg: string; text: string; bar: string; dot: string }> = {
+  "gathering-requirements": { border: "border-slate-300", bg: "bg-slate-50", text: "text-slate-700", bar: "bg-slate-400", dot: "text-slate-500" },
+  "in-analysis": { border: "border-blue-200", bg: "bg-blue-50", text: "text-blue-700", bar: "bg-blue-400", dot: "text-blue-500" },
+  validation: { border: "border-indigo-200", bg: "bg-indigo-50", text: "text-indigo-700", bar: "bg-indigo-400", dot: "text-indigo-500" },
+  planned: { border: "border-violet-200", bg: "bg-violet-50", text: "text-violet-700", bar: "bg-violet-400", dot: "text-violet-500" },
+  "in-progress": { border: "border-amber-200", bg: "bg-amber-50", text: "text-amber-700", bar: "bg-amber-400", dot: "text-amber-500" },
+  done: { border: "border-teal-200", bg: "bg-teal-50", text: "text-teal-700", bar: "bg-teal-400", dot: "text-teal-500" },
+  "ready-for-uat": { border: "border-cyan-200", bg: "bg-cyan-50", text: "text-cyan-700", bar: "bg-cyan-400", dot: "text-cyan-500" },
+  handover: { border: "border-sky-200", bg: "bg-sky-50", text: "text-sky-700", bar: "bg-sky-400", dot: "text-sky-500" },
+  production: { border: "border-emerald-200", bg: "bg-emerald-50", text: "text-emerald-700", bar: "bg-emerald-400", dot: "text-emerald-500" },
+  completed: { border: "border-lime-200", bg: "bg-lime-50", text: "text-lime-800", bar: "bg-lime-500", dot: "text-lime-600" },
+};
+
 export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
   const [active, setActive] = useState<string | null>(null);
 
