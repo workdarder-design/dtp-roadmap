@@ -38,13 +38,26 @@ export type Sprint = string;
 export const PIS = ["PI-2026 Q3"] as const;
 
 export const MODULES = [
-  "Employee Appraisal",
+  "Dashboards",
   "Performance",
-  "Committee",
+  "Services",
+  "Projects",
+  "Admin",
+  "Committees",
+  "BAU",
+  "Employee Appraisal",
+  "Innovation",
   "Audit",
-  "Filter Unification",
-  "Committee MOM Enhancements",
 ] as const;
+
+/** Older saved data used legacy module names — normalize them to the current list. */
+export const LEGACY_MODULE_MAP: Record<string, string> = {
+  Committee: "Committees",
+  "Committee MOM Enhancements": "Committees",
+  "Filter Unification": "Dashboards",
+};
+
+export const normalizeModule = (m: string) => LEGACY_MODULE_MAP[m] ?? m;
 
 /** Framework is SAFe-only for now; the model keeps room for Scrum later. */
 export type Framework = "SAFe" | "Scrum";
