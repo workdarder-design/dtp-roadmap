@@ -259,6 +259,7 @@ export function ClientRoadmapView() {
         <Tabs defaultValue="roadmap" className="space-y-4">
           <TabsList>
             <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
+            <TabsTrigger value="workflow">Workflow</TabsTrigger>
             <TabsTrigger value="train">SAFe Train</TabsTrigger>
             <TabsTrigger value="deliveries">Deliveries</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
