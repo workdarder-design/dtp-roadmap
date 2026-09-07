@@ -57,6 +57,7 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
               const list = grouped.get(stage.key) ?? [];
               const pct = Math.round((list.length / total) * 100);
               const isActive = active === stage.key;
+              const tone = stageTone[stage.key];
               return (
                 <div key={stage.key} className="flex items-center gap-2">
                   <button
@@ -64,9 +65,8 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
                     onClick={() => setActive(isActive ? null : stage.key)}
                     className={cn(
                       "w-[168px] rounded-xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md",
-                      isActive
-                        ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
-                        : "bg-background",
+                      tone ? `${tone.bg} ${tone.border}` : "bg-background border-border",
+                      isActive && "shadow-md ring-2 ring-primary/30",
                       !list.length && "opacity-60",
                     )}
                   >
@@ -78,14 +78,14 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
                     >
                       {stage.phase}
                     </span>
-                    <p className="mt-2 text-xs font-semibold leading-tight">{stage.label}</p>
+                    <p className={cn("mt-2 text-xs font-semibold leading-tight", tone?.text)}>{stage.label}</p>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-xl font-bold tabular-nums">{list.length}</span>
+                      <span className={cn("text-xl font-bold tabular-nums", tone?.text)}>{list.length}</span>
                       <span className="text-[10px] text-muted-foreground">/ {items.length} · {pct}%</span>
                     </div>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full bg-primary transition-all"
+                        className={cn("h-full rounded-full transition-all", tone?.bar ?? "bg-primary")}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
