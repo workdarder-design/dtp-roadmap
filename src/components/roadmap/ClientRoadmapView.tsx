@@ -102,6 +102,15 @@ export function ClientRoadmapView() {
   );
   const next = upcoming.find((i) => (deliveryEta(i) as string) >= today) ?? upcoming[0] ?? null;
 
+  const readyForUat = useMemo(
+    () =>
+      filtered
+        .filter((i) => i.deliveryStatus === "Ready for UAT" || i.deliveryStatus === "UAT")
+        .sort((a, b) => (deliveryEta(a) ?? "9999").localeCompare(deliveryEta(b) ?? "9999")),
+    [filtered],
+  );
+
+
   const kpis = [
     { label: "Total Items", value: k.total, icon: Layers, tone: "text-foreground" },
     { label: "Completed", value: k.completed, icon: CheckCircle2, tone: "text-status-done" },
