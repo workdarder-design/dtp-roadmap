@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ShareTokenRouteImport } from './routes/share.$token'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnnouncementsRoute = AnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -44,6 +50,7 @@ const ShareTokenRoute = ShareTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/announcements': typeof AnnouncementsRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/share/$token': typeof ShareTokenRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/announcements': typeof AnnouncementsRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/share/$token': typeof ShareTokenRoute
@@ -59,22 +67,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/announcements': typeof AnnouncementsRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analytics' | '/reports' | '/settings' | '/share/$token'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/announcements'
+    | '/reports'
+    | '/settings'
+    | '/share/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analytics' | '/reports' | '/settings' | '/share/$token'
+  to:
+    | '/'
+    | '/analytics'
+    | '/announcements'
+    | '/reports'
+    | '/settings'
+    | '/share/$token'
   id:
-    '__root__' | '/' | '/analytics' | '/reports' | '/settings' | '/share/$token'
+    | '__root__'
+    | '/'
+    | '/analytics'
+    | '/announcements'
+    | '/reports'
+    | '/settings'
+    | '/share/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AnnouncementsRoute: typeof AnnouncementsRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   ShareTokenRoute: typeof ShareTokenRoute
@@ -94,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/announcements': {
+      id: '/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -123,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AnnouncementsRoute: AnnouncementsRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   ShareTokenRoute: ShareTokenRoute,

@@ -1,3 +1,5 @@
+import { SPRINT_NAMES } from "./sprints";
+
 export const PRIORITIES = ["High", "Medium", "Low"] as const;
 export type Priority = (typeof PRIORITIES)[number];
 
@@ -29,16 +31,9 @@ export const DELIVERY_STATUSES = [
 ] as const;
 export type DeliveryStatus = (typeof DELIVERY_STATUSES)[number];
 
-export const SPRINTS = [
-  "Sprint 10",
-  "Sprint 11",
-  "Sprint 12",
-  "Sprint 13",
-  "Sprint 14",
-  "Sprint 15",
-  "Sprint 16",
-] as const;
-export type Sprint = (typeof SPRINTS)[number];
+export const SPRINTS = SPRINT_NAMES;
+export type Sprint = string;
+
 
 export const PIS = ["PI-2026 Q3"] as const;
 
