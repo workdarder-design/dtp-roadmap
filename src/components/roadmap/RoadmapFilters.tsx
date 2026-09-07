@@ -29,7 +29,6 @@ const SCOPE_LABELS: Record<ScopeType, string> = {
   module: "Module",
   feature: "Feature",
   sprint: "Sprint",
-  pi: "PI",
 };
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {

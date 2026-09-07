@@ -35,7 +35,6 @@ export const SPRINTS = SPRINT_NAMES;
 export type Sprint = string;
 
 
-export const PIS = ["PI-2026 Q3"] as const;
 
 export const MODULES = [
   "Dashboards",
@@ -68,7 +67,6 @@ export interface RoadmapItem {
   feature: string;
   priority: Priority;
   sprint: string;
-  pi: string;
   etaStaging: string | null; // ISO yyyy-mm-dd
   etaProduction: string | null;
   businessStatus: BusinessStatus;
@@ -78,12 +76,11 @@ export interface RoadmapItem {
   framework: Framework;
 }
 
-export type ScopeType = "project" | "module" | "feature" | "sprint" | "pi";
+export type ScopeType = "project" | "module" | "feature" | "sprint";
 
 export interface RoadmapFilterState {
   scopeType: ScopeType;
   scopeValue: string | null;
-  pi: string;
   sprint: string;
   module: string;
   priority: string;
@@ -99,7 +96,6 @@ export interface RoadmapFilterState {
 export const DEFAULT_FILTERS: RoadmapFilterState = {
   scopeType: "project",
   scopeValue: null,
-  pi: "all",
   sprint: "all",
   module: "all",
   priority: "all",
