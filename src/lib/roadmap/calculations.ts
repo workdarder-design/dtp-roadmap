@@ -112,3 +112,18 @@ export function formatDate(iso: string | null) {
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
 }
+
+export function daysUntil(iso: string): number {
+  const ms = new Date(iso + "T00:00:00").getTime() - new Date(todayISO() + "T00:00:00").getTime();
+  return Math.round(ms / 86400000);
+}
+
+/** Closest upcoming (or nearest past, if none upcoming) non-completed delivery. */
+export function nextDelivery(items: RoadmapItem[]): RoadmapItem | null {
+  const dated = items.filter((i) => !isCompleted(i) && (i.etaProduction ?? i.etaStaging));
+  if (!dated.length) return null;
+  const eta = (i: RoadmapItem) => (i.etaProduction ?? i.etaStaging)!;
+  const upcoming = dated.filter((i) => eta(i) >= todayISO());
+  const pool = upcoming.length ? upcoming : dated;
+  return pool.sort((a, b) => eta(a).localeCompare(eta(b)))[0];
+}
