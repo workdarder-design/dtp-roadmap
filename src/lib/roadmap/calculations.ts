@@ -78,6 +78,15 @@ export function applyFilters(items: RoadmapItem[], f: RoadmapFilterState): Roadm
     if (f.module !== "all" && i.module !== f.module) return false;
     if (f.priority !== "all" && i.priority !== f.priority) return false;
     if (f.status !== "all" && derivedState(i) !== f.status) return false;
+    if (f.businessStatus !== "all" && (i.businessStatus || "Unset") !== f.businessStatus) return false;
+    if (f.devStatus !== "all" && (i.devStatus || "Unset") !== f.devStatus) return false;
+    if (f.deliveryStatus !== "all" && (i.deliveryStatus || "Unset") !== f.deliveryStatus) return false;
+    if (f.etaFrom || f.etaTo) {
+      const eta = i.etaProduction ?? i.etaStaging;
+      if (!eta) return false;
+      if (f.etaFrom && eta < f.etaFrom) return false;
+      if (f.etaTo && eta > f.etaTo) return false;
+    }
     if (f.search.trim()) {
       const q = f.search.toLowerCase();
       const hay = [i.id, i.module, i.feature, i.sprint, i.remarks, i.businessStatus, i.devStatus, i.deliveryStatus]
@@ -102,4 +111,19 @@ export function formatDate(iso: string | null) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
+}
+
+export function daysUntil(iso: string): number {
+  const ms = new Date(iso + "T00:00:00").getTime() - new Date(todayISO() + "T00:00:00").getTime();
+  return Math.round(ms / 86400000);
+}
+
+/** Closest upcoming (or nearest past, if none upcoming) non-completed delivery. */
+export function nextDelivery(items: RoadmapItem[]): RoadmapItem | null {
+  const dated = items.filter((i) => !isCompleted(i) && (i.etaProduction ?? i.etaStaging));
+  if (!dated.length) return null;
+  const eta = (i: RoadmapItem) => (i.etaProduction ?? i.etaStaging)!;
+  const upcoming = dated.filter((i) => eta(i) >= todayISO());
+  const pool = upcoming.length ? upcoming : dated;
+  return pool.sort((a, b) => eta(a).localeCompare(eta(b)))[0] ?? null;
 }

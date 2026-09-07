@@ -80,6 +80,11 @@ export interface RoadmapFilterState {
   module: string;
   priority: string;
   status: string;
+  businessStatus: string;
+  devStatus: string;
+  deliveryStatus: string;
+  etaFrom: string;
+  etaTo: string;
   search: string;
 }
 
@@ -91,5 +96,10 @@ export const DEFAULT_FILTERS: RoadmapFilterState = {
   module: "all",
   priority: "all",
   status: "all",
+  businessStatus: "all",
+  devStatus: "all",
+  deliveryStatus: "all",
+  etaFrom: "",
+  etaTo: "",
   search: "",
 };
