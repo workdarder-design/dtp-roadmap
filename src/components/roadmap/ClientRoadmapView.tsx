@@ -160,33 +160,33 @@ export function ClientRoadmapView() {
         >
           <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <div>
-              <Pill className="border-white/30 bg-white/15 text-white">PI-2026 Q3 · SAFe Program Increment</Pill>
+              <Pill className="border-brand-foreground/30 bg-brand-foreground/15 text-brand-foreground">PI-2026 Q3 · SAFe Program Increment</Pill>
               <h2 className="mt-3 text-xl font-semibold">Project Overview</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-foreground/80">
                 Delivery roadmap for the DCAA program, planned across {sprintsUsed.length || SPRINTS.length}{" "}
                 sprints and {modulesUsed.length} modules. This page shows scope, delivery dates for staging
                 and production, and current progress.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {modulesUsed.map((m) => (
-                  <Pill key={m} className="border-white/25 bg-white/10 text-white">
+                  <Pill key={m} className="border-brand-foreground/25 bg-brand-foreground/10 text-brand-foreground">
                     {m}
                   </Pill>
                 ))}
               </div>
             </div>
-            <div className="rounded-xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+            <div className="rounded-xl border border-brand-foreground/20 bg-brand-foreground/10 p-4 backdrop-blur-sm">
               <div className="flex items-baseline justify-between">
-                <span className="text-sm font-medium text-white/90">Overall progress</span>
+                <span className="text-sm font-medium text-brand-foreground/90">Overall progress</span>
                 <span className="text-3xl font-semibold tabular-nums">{k.completionPct}%</span>
               </div>
-              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-brand-foreground/20">
                 <div
-                  className="h-full rounded-full bg-white transition-all"
+                  className="h-full rounded-full bg-brand-foreground transition-all"
                   style={{ width: `${k.completionPct}%` }}
                 />
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-white/75">
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-brand-foreground/75">
                 <div>
                   <div className="text-lg font-semibold text-white tabular-nums">{k.completed}</div>
                   Completed
