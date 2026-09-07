@@ -37,6 +37,7 @@ import {
   todayISO,
 } from "@/lib/roadmap/calculations";
 import { clientRemark } from "@/lib/roadmap/share";
+import { ClientWorkflowDiagram } from "./ClientWorkflowDiagram";
 import { cn } from "@/lib/utils";
 
 const deliveryEta = (i: RoadmapItem) => i.etaProduction ?? i.etaStaging;
