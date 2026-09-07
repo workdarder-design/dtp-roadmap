@@ -37,7 +37,7 @@ export function RoadmapItemModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item?: RoadmapItem;
+  item?: RoadmapItem | undefined;
 }) {
   const { addItem, updateItem, nextId, isAdmin } = useRoadmap();
   const editing = !!item;
@@ -154,7 +154,7 @@ export function RoadmapItemModal({
   );
 }
 
-function FieldError({ msg }: { msg?: string }) {
+function FieldError({ msg }: { msg?: string | undefined }) {
   if (!msg) return null;
   return <p className="text-xs text-destructive">{msg}</p>;
 }

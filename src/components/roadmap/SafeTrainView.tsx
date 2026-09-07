@@ -25,8 +25,8 @@ export function SafeTrainView() {
 
   const sprints = useMemo(() => {
     const used = new Set(filtered.map((i) => i.sprint));
-    const list = SPRINTS.filter((s) => used.has(s));
-    return list.length ? list : SPRINTS.slice(0, 5);
+    const list = SPRINTS.map(String).filter((s) => used.has(s));
+    return list.length ? list : SPRINTS.map(String).slice(0, 5);
   }, [filtered]);
 
   const columns = zoom === "sprint" ? sprints : zoom === "month" ? chunk(sprints, 2) .map((c) => c.join(" · ")) : ["PI-2026 Q3"];
@@ -37,7 +37,7 @@ export function SafeTrainView() {
   };
 
   const modules = Array.from(new Set(filtered.map((i) => i.module)));
-  const todayCol = colIndex(sprints[Math.min(2, sprints.length - 1)]);
+  const todayCol = colIndex(sprints[Math.min(2, sprints.length - 1)] ?? "");
 
   return (
     <div className="rounded-xl border bg-card shadow-sm">
@@ -165,8 +165,10 @@ export function SafeTrainView() {
 
       <RoadmapItemModal
         open={!!editing}
-        onOpenChange={(o) => !o && setEditing(null)}
-        item={editing ?? undefined}
+        onOpenChange={(o) => {
+          if (!o) setEditing(null);
+        }}
+        {...(editing ? { item: editing } : {})}
       />
     </div>
   );

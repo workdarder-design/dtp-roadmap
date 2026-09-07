@@ -82,7 +82,7 @@ export function RoadmapTable() {
   const cols = COLUMNS.filter((c) => visible.includes(c.key));
 
   const startResize = (key: string, e: React.MouseEvent) => {
-    resizing.current = { key, startX: e.clientX, startW: widths[key] };
+    resizing.current = { key, startX: e.clientX, startW: widths[key] ?? 140 };
     const move = (ev: MouseEvent) => {
       const r = resizing.current;
       if (!r) return;

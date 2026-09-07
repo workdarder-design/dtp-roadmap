@@ -8,12 +8,12 @@ export const roadmapItemSchema = z.object({
   priority: z.enum(PRIORITIES),
   sprint: z.string().min(1, "Sprint is required"),
   pi: z.string().min(1, "PI is required"),
-  etaStaging: z.string().default(""),
-  etaProduction: z.string().default(""),
+  etaStaging: z.string(),
+  etaProduction: z.string(),
   businessStatus: z.enum(BUSINESS_STATUSES),
   devStatus: z.enum(DEV_STATUSES),
   deliveryStatus: z.enum(DELIVERY_STATUSES),
-  remarks: z.string().default(""),
+  remarks: z.string(),
 });
 
 export type RoadmapItemInput = z.infer<typeof roadmapItemSchema>;
