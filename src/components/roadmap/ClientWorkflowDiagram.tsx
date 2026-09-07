@@ -139,13 +139,13 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
   );
 }
 
-function FeatureCard({ item }: { item: RoadmapItem }) {
+function FeatureCard({ item, tone }: { item: RoadmapItem; tone?: { border: string; bg: string; text: string; bar: string; dot: string } }) {
   const idx = currentStageIndex(item);
   const pct = Math.round(((idx + 1) / WORKFLOW_STAGES.length) * 100);
   return (
-    <div className="rounded-xl border bg-background p-3 transition-shadow hover:shadow-sm">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{item.module}</p>
-      <p className="mt-0.5 text-sm font-medium leading-tight">{item.feature}</p>
+    <div className={cn("rounded-xl border p-3 transition-shadow hover:shadow-sm", tone ? `${tone.bg} ${tone.border}` : "bg-background border-border")}>
+      <p className={cn("text-[10px] uppercase tracking-wide", tone?.text ?? "text-muted-foreground")}>{item.module}</p>
+      <p className={cn("mt-0.5 text-sm font-medium leading-tight", tone?.text)}>{item.feature}</p>
       <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
         <span>Sprint {item.sprint}</span>
         <span>
@@ -155,7 +155,7 @@ function FeatureCard({ item }: { item: RoadmapItem }) {
         </span>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+        <div className={cn("h-full rounded-full", tone?.bar ?? "bg-primary")} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
