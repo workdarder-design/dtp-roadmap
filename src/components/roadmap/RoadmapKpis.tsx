@@ -19,8 +19,8 @@ interface CardSpec {
   iconTone: string;
   value: string;
   sub: string;
-  progress?: number;
-  badge?: { text: string; tone: string };
+  progress?: number | undefined;
+  badge?: { text: string; tone: string } | undefined;
 }
 
 export function RoadmapKpis({ items }: { items: RoadmapItem[] }) {
