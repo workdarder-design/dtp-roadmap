@@ -10,6 +10,7 @@ import { TimelineView } from "@/components/roadmap/TimelineView";
 import { KanbanView } from "@/components/roadmap/KanbanView";
 import { AnalyticsView } from "@/components/roadmap/AnalyticsView";
 import { RoadmapItemModal } from "@/components/roadmap/RoadmapItemModal";
+import { ShareRoadmapDialog } from "@/components/roadmap/ShareRoadmapDialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useRoadmap } from "@/lib/roadmap/store";
@@ -54,9 +55,12 @@ function RoadmapWorkspace() {
             PI-2026 Q3 · {filtered.length} items in current scope
           </p>
         </div>
-        <Button onClick={() => setAddOpen(true)} disabled={!isAdmin}>
-          <Plus className="mr-1.5 h-4 w-4" /> Add Roadmap Item
-        </Button>
+        <div className="flex items-center gap-2">
+          <ShareRoadmapDialog />
+          <Button onClick={() => setAddOpen(true)} disabled={!isAdmin}>
+            <Plus className="mr-1.5 h-4 w-4" /> Add Roadmap Item
+          </Button>
+        </div>
       </div>
 
       <RoadmapKpis items={filtered} />
