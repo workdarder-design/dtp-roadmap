@@ -481,7 +481,7 @@ export function ClientRoadmapView() {
               <div className="rounded-2xl border bg-card p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold">Ready for UAT</h3>
-                  <Pill variant="info">{readyForUat.length}</Pill>
+                  <Pill variant="progress">{readyForUat.length}</Pill>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Features available for client acceptance testing
