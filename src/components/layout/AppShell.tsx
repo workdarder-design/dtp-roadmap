@@ -9,6 +9,7 @@ import {
   LifeBuoy,
   LogOut,
   Megaphone,
+  Rocket,
   Search,
   Settings,
   Table2,
