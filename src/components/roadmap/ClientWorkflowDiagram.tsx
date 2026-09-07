@@ -132,7 +132,11 @@ function FeatureCard({ item }: { item: RoadmapItem }) {
       <p className="mt-0.5 text-sm font-medium leading-tight">{item.feature}</p>
       <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
         <span>Sprint {item.sprint}</span>
-        <span>{item.eta ? new Date(item.eta).toLocaleDateString() : "—"}</span>
+        <span>
+          {item.etaProduction || item.etaStaging
+            ? new Date((item.etaProduction ?? item.etaStaging) as string).toLocaleDateString()
+            : "—"}
+        </span>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
         <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
