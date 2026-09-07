@@ -152,7 +152,7 @@ export function ClientRoadmapView() {
       <main className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
         {/* Project overview — gradient hero card */}
         <section
-          className="overflow-hidden rounded-2xl p-6 text-white shadow-md"
+          className="overflow-hidden rounded-2xl p-6 text-brand-foreground shadow-md"
           style={{
             backgroundImage:
               "linear-gradient(120deg, var(--brand) 0%, color-mix(in oklab, var(--brand) 70%, black) 60%, color-mix(in oklab, var(--brand) 45%, black) 100%)",
@@ -188,15 +188,15 @@ export function ClientRoadmapView() {
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-brand-foreground/75">
                 <div>
-                  <div className="text-lg font-semibold text-white tabular-nums">{k.completed}</div>
+                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">{k.completed}</div>
                   Completed
                 </div>
                 <div>
-                  <div className="text-lg font-semibold text-white tabular-nums">{k.inProgress}</div>
+                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">{k.inProgress}</div>
                   In progress
                 </div>
                 <div>
-                  <div className="text-lg font-semibold text-white tabular-nums">
+                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">
                     {Math.max(0, k.total - k.completed - k.inProgress)}
                   </div>
                   Planned
