@@ -23,7 +23,14 @@ interface RoadmapContextValue {
   nextId: () => string;
 }
 
-const RoadmapContext = createContext<RoadmapContextValue | null>(null);
+// Keep a single context instance even if this module is evaluated twice
+// (dev HMR / route code-splitting can create duplicate module instances).
+const globalStore = globalThis as typeof globalThis & {
+  __dcaaRoadmapContext?: React.Context<RoadmapContextValue | null>;
+};
+const RoadmapContext =
+  globalStore.__dcaaRoadmapContext ??
+  (globalStore.__dcaaRoadmapContext = createContext<RoadmapContextValue | null>(null));
 
 export function RoadmapProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<RoadmapItem[]>(SEED_ITEMS);
