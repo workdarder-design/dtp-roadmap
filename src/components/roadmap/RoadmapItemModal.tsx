@@ -112,7 +112,16 @@ export function RoadmapItemModal({
         <form onSubmit={form.handleSubmit(submit)} className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>ID</Label>
-            <Input {...form.register("id")} disabled={editing} />
+            <Input
+              {...form.register("id")}
+              readOnly
+              disabled
+              tabIndex={-1}
+              className="font-mono cursor-not-allowed bg-muted text-muted-foreground"
+            />
+            <p className="text-xs text-muted-foreground">
+              {editing ? "Read-only identifier." : "Generated automatically."}
+            </p>
             <FieldError msg={form.formState.errors.id?.message} />
           </div>
           {sel("module", "Module", MODULES)}
