@@ -63,7 +63,7 @@ export function ClientRoadmapView() {
   const upcoming = useMemo(
     () =>
       filtered
-        .filter((i) => !isCompleted(i) && deliveryEta(i) && (deliveryEta(i) as string) >= today)
+        .filter((i) => !isCompleted(i) && deliveryEta(i))
         .sort((a, b) => (deliveryEta(a) as string).localeCompare(deliveryEta(b) as string)),
     [filtered, today],
   );
@@ -74,7 +74,7 @@ export function ClientRoadmapView() {
         .sort((a, b) => (deliveryEta(b) ?? "").localeCompare(deliveryEta(a) ?? "")),
     [filtered],
   );
-  const next = upcoming[0] ?? null;
+  const next = upcoming.find((i) => (deliveryEta(i) as string) >= today) ?? upcoming[0] ?? null;
 
   const kpis = [
     { label: "Total Items", value: k.total, icon: Layers, tone: "text-foreground" },
