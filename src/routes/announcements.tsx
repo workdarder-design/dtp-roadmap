@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, Eye, Megaphone, Send } from "lucide-react";
+import { Code2, Copy, Eye, Megaphone, Send } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { useAnnouncements } from "@/lib/roadmap/useAnnouncements";
 import {
   ANNOUNCEMENT_STATUSES,
   announcementEmail,
+  announcementEmailHtml,
   announcementSubject,
   type AnnouncementStatus,
   type SprintAnnouncement,
@@ -315,14 +316,16 @@ function EmailDialog({
   announcement: SprintAnnouncement | null;
   onClose: () => void;
 }) {
+  const [tab, setTab] = useState<"design" | "html" | "text">("design");
   if (!announcement) return null;
   const subject = announcementSubject(announcement);
   const body = announcementEmail(announcement);
+  const html = announcementEmailHtml(announcement);
 
-  const copy = async () => {
+  const write = async (value: string, label: string) => {
     try {
-      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
-      toast.success("Email copied");
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied`);
     } catch {
       toast.error("Could not copy the email");
     }
@@ -332,19 +335,55 @@ function EmailDialog({
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
+  const tabs: { id: typeof tab; label: string }[] = [
+    { id: "design", label: "Designed email" },
+    { id: "html", label: "HTML source" },
+    { id: "text", label: "Plain text" },
+  ];
+
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Announcement email</DialogTitle>
           <DialogDescription>{subject}</DialogDescription>
         </DialogHeader>
-        <pre className="max-h-[50vh] overflow-auto whitespace-pre-wrap rounded-lg border bg-surface p-4 text-sm leading-relaxed">
-          {body}
-        </pre>
+
+        <div className="inline-flex w-fit gap-1 rounded-lg border bg-surface p-1">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                tab === t.id
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "design" ? (
+          <iframe
+            title="Announcement email preview"
+            srcDoc={html}
+            className="h-[55vh] w-full rounded-lg border bg-card"
+          />
+        ) : (
+          <pre className="max-h-[55vh] overflow-auto whitespace-pre-wrap rounded-lg border bg-surface p-4 text-xs leading-relaxed">
+            {tab === "html" ? html : body}
+          </pre>
+        )}
+
         <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="outline" onClick={copy}>
-            <Copy className="mr-1.5 h-4 w-4" /> Copy Email
+          <Button variant="outline" onClick={() => write(html, "HTML")}>
+            <Code2 className="mr-1.5 h-4 w-4" /> Copy HTML
+          </Button>
+          <Button variant="outline" onClick={() => write(`Subject: ${subject}\n\n${body}`, "Email")}>
+            <Copy className="mr-1.5 h-4 w-4" /> Copy Text
           </Button>
           <Button onClick={send}>
             <Send className="mr-1.5 h-4 w-4" /> Send Email
