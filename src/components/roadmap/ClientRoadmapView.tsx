@@ -37,6 +37,7 @@ import {
   todayISO,
 } from "@/lib/roadmap/calculations";
 import { clientRemark } from "@/lib/roadmap/share";
+import { ClientWorkflowDiagram } from "./ClientWorkflowDiagram";
 import { cn } from "@/lib/utils";
 
 const deliveryEta = (i: RoadmapItem) => i.etaProduction ?? i.etaStaging;
@@ -259,6 +260,7 @@ export function ClientRoadmapView() {
         <Tabs defaultValue="roadmap" className="space-y-4">
           <TabsList>
             <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
+            <TabsTrigger value="workflow">Workflow</TabsTrigger>
             <TabsTrigger value="train">SAFe Train</TabsTrigger>
             <TabsTrigger value="deliveries">Deliveries</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
@@ -549,6 +551,10 @@ export function ClientRoadmapView() {
           {/* Insights */}
           <TabsContent value="insights">
             <InsightsPanel items={filtered} />
+          </TabsContent>
+
+          <TabsContent value="workflow">
+            <ClientWorkflowDiagram items={filtered} />
           </TabsContent>
         </Tabs>
 
