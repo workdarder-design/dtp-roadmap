@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { SEED_ITEMS } from "./seed";
-import { DEFAULT_FILTERS, type RoadmapFilterState, type RoadmapItem } from "./types";
+import { DEFAULT_FILTERS, normalizeModule, type RoadmapFilterState, type RoadmapItem } from "./types";
 import { applyFilters } from "./calculations";
 
 const STORAGE_KEY = "dcaa-roadmap-v1";
