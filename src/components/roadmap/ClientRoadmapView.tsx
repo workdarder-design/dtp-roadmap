@@ -470,25 +470,43 @@ export function ClientRoadmapView() {
                 items={completed.slice(0, 8)}
               />
               <div className="rounded-2xl border bg-card p-5 shadow-sm">
-                <h3 className="text-sm font-semibold">Delivery Status</h3>
-                <div className="mt-4 space-y-3">
-                  {deliveryMix.map((d) => (
-                    <div key={d.name}>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium">{d.name}</span>
-                        <span className="tabular-nums text-muted-foreground">{d.value}</span>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Ready for UAT</h3>
+                  <Pill variant="info">{readyForUat.length}</Pill>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Features available for client acceptance testing
+                </p>
+                <div className="mt-4 space-y-2">
+                  {readyForUat.slice(0, 8).map((i) => (
+                    <div key={i.id} className="rounded-xl border bg-surface p-3">
+                      <div className="truncate text-sm font-medium" title={i.feature}>
+                        {i.feature}
                       </div>
-                      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-brand transition-all"
-                          style={{ width: `${filtered.length ? (d.value / filtered.length) * 100 : 0}%` }}
-                        />
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        {i.module} · {i.sprint}
+                      </div>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <Pill variant={deliveryTone(i.deliveryStatus)}>
+                          {i.deliveryStatus || "Ready for UAT"}
+                        </Pill>
+                        <span className="text-xs tabular-nums text-muted-foreground">
+                          {formatDate(deliveryEta(i)) || "—"}
+                        </span>
                       </div>
                     </div>
                   ))}
-                  {!deliveryMix.length && <p className="text-sm text-muted-foreground">No data.</p>}
+                  {!readyForUat.length && (
+                    <p className="text-sm text-muted-foreground">No features are ready for UAT yet.</p>
+                  )}
+                  {readyForUat.length > 8 && (
+                    <p className="text-xs text-muted-foreground">
+                      +{readyForUat.length - 8} more ready for UAT
+                    </p>
+                  )}
                 </div>
               </div>
+
             </section>
 
             {/* Staging & production ETA */}
