@@ -72,8 +72,6 @@ export function applyFilters(items: RoadmapItem[], f: RoadmapFilterState): Roadm
     if (f.scopeType === "module" && f.scopeValue && i.module !== f.scopeValue) return false;
     if (f.scopeType === "feature" && f.scopeValue && i.feature !== f.scopeValue) return false;
     if (f.scopeType === "sprint" && f.scopeValue && i.sprint !== f.scopeValue) return false;
-    if (f.scopeType === "pi" && f.scopeValue && i.pi !== f.scopeValue) return false;
-    if (f.pi !== "all" && i.pi !== f.pi) return false;
     if (f.sprint !== "all" && i.sprint !== f.sprint) return false;
     if (f.module !== "all" && i.module !== f.module) return false;
     if (f.priority !== "all" && i.priority !== f.priority) return false;

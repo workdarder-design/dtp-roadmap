@@ -8,7 +8,7 @@ import { Pill, StateBadge, priorityTone, stateTone } from "./StatusBadge";
 import { RoadmapItemModal } from "./RoadmapItemModal";
 import { cn } from "@/lib/utils";
 
-type Zoom = "sprint" | "month" | "pi";
+type Zoom = "sprint" | "month";
 
 const barTone: Record<string, string> = {
   Completed: "bg-status-done/15 border-status-done/40",
@@ -29,10 +29,9 @@ export function SafeTrainView() {
     return list.length ? list : SPRINTS.map(String).slice(0, 5);
   }, [filtered]);
 
-  const columns = zoom === "sprint" ? sprints : zoom === "month" ? chunk(sprints, 2) .map((c) => c.join(" · ")) : ["PI-2026 Q3"];
+  const columns = zoom === "sprint" ? sprints : chunk(sprints, 2).map((c) => c.join(" · "));
   const colIndex = (sprint: string) => {
     if (zoom === "sprint") return sprints.indexOf(sprint);
-    if (zoom === "pi") return 0;
     return Math.floor(Math.max(0, sprints.indexOf(sprint)) / 2);
   };
 
@@ -44,10 +43,10 @@ export function SafeTrainView() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b p-3">
         <div>
           <h3 className="text-sm font-semibold">SAFe Program Increment Train</h3>
-          <p className="text-xs text-muted-foreground">PI-2026 Q3 · Agile Release Train lanes by module</p>
+          <p className="text-xs text-muted-foreground">Agile Release Train lanes by module</p>
         </div>
         <div className="flex items-center gap-1 rounded-lg bg-surface p-1">
-          {(["sprint", "month", "pi"] as Zoom[]).map((z) => (
+          {(["sprint", "month"] as Zoom[]).map((z) => (
             <Button
               key={z}
               size="sm"
@@ -64,7 +63,7 @@ export function SafeTrainView() {
       <div className="overflow-x-auto p-4">
         <div className="min-w-[900px]">
           <div className="mb-2 rounded-md bg-primary/10 py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-primary">
-            PI-2026 Q3
+            Program Train
           </div>
           <div
             className="grid gap-2 border-b pb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"

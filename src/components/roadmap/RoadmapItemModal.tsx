@@ -22,7 +22,6 @@ import {
   DELIVERY_STATUSES,
   DEV_STATUSES,
   MODULES,
-  PIS,
   PRIORITIES,
   SPRINTS,
   type RoadmapItem,
@@ -80,7 +79,9 @@ export function RoadmapItemModal({
 
   const sel = (name: keyof RoadmapItemInput, label: string, options: readonly string[]) => (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      <Label>
+        {label} <Req />
+      </Label>
       <Select
         value={(form.watch(name) as string) || NONE}
         onValueChange={(v) => form.setValue(name, v === NONE ? "" : v, { shouldValidate: true })}
@@ -126,13 +127,14 @@ export function RoadmapItemModal({
           </div>
           {sel("module", "Module", MODULES)}
           <div className="space-y-1.5 sm:col-span-2">
-            <Label>Feature</Label>
+            <Label>
+              Feature <Req />
+            </Label>
             <Input {...form.register("feature")} placeholder="Feature name" />
             <FieldError msg={form.formState.errors.feature?.message} />
           </div>
           {sel("priority", "Priority", PRIORITIES)}
           {sel("sprint", "Sprint", SPRINTS)}
-          {sel("pi", "PI", PIS)}
           <div className="space-y-1.5">
             <Label>ETA on Staging</Label>
             <Input type="date" {...form.register("etaStaging")} />
@@ -163,6 +165,14 @@ export function RoadmapItemModal({
   );
 }
 
+function Req() {
+  return (
+    <span aria-hidden className="text-destructive">
+      *
+    </span>
+  );
+}
+
 function FieldError({ msg }: { msg?: string | undefined }) {
   if (!msg) return null;
   return <p className="text-xs text-destructive">{msg}</p>;
@@ -175,7 +185,6 @@ function blank(id: string): RoadmapItemInput {
     feature: "",
     priority: "Medium",
     sprint: "Sprint 14",
-    pi: "PI-2026 Q3",
     etaStaging: "",
     etaProduction: "",
     businessStatus: "",

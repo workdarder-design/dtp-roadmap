@@ -18,7 +18,6 @@ const item = (
   feature,
   priority,
   sprint,
-  pi: "PI-2026 Q3",
   etaStaging,
   etaProduction,
   businessStatus,
