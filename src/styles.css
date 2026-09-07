@@ -65,6 +65,10 @@
   --color-status-blocked: var(--status-blocked);
   --color-status-delayed: var(--status-delayed);
   --color-surface: var(--surface);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
   --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -102,12 +106,16 @@
   --sidebar-accent-foreground: oklch(0.42 0.1 232);
   --sidebar-border: oklch(0.93 0.008 250);
   --sidebar-ring: oklch(0.62 0.12 232);
-  --surface: oklch(0.972 0.004 240);
+  --surface: oklch(0.955 0.015 185);
   --status-planned: oklch(0.62 0.03 250);
   --status-progress: oklch(0.62 0.13 240);
   --status-done: oklch(0.6 0.12 155);
   --status-blocked: oklch(0.58 0.19 25);
   --status-delayed: oklch(0.72 0.15 65);
+  --brand: oklch(0.6 0.12 192);
+  --brand-foreground: oklch(0.99 0.005 240);
+  --highlight: oklch(0.84 0.15 92);
+  --highlight-foreground: oklch(0.35 0.05 250);
   --ring: oklch(0.62 0.12 232);
 }
 
