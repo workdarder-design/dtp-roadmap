@@ -8,6 +8,7 @@ import {
   Home,
   LifeBuoy,
   LogOut,
+  Megaphone,
   Search,
   Settings,
   Table2,
@@ -26,6 +27,7 @@ const NAV = [
   { to: "/", label: "Roadmap", icon: Table2, exact: true },
   { to: "/analytics", label: "Analytics", icon: BarChart3, exact: false },
   { to: "/reports", label: "Reports", icon: FileText, exact: false },
+  { to: "/announcements", label: "Announcements", icon: Megaphone, exact: false },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
