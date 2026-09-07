@@ -139,7 +139,7 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
   );
 }
 
-function FeatureCard({ item, tone }: { item: RoadmapItem; tone?: { border: string; bg: string; text: string; bar: string; dot: string } }) {
+function FeatureCard({ item, tone }: { item: RoadmapItem; tone: { border: string; bg: string; text: string; bar: string; dot: string } | undefined }) {
   const idx = currentStageIndex(item);
   const pct = Math.round(((idx + 1) / WORKFLOW_STAGES.length) * 100);
   return (
