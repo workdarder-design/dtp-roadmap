@@ -20,10 +20,13 @@ export function WorkflowView() {
   const [dragId, setDragId] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
 
-  const modules = useMemo(
-    () => Array.from(new Set(filtered.map((i) => i.module))).sort(),
-    [filtered],
-  );
+  const columns = useMemo(() => {
+    return WORKFLOW_STAGES.map((stage, index) => ({
+      stage,
+      index,
+      items: filtered.filter((i) => currentStageIndex(i) === index),
+    }));
+  }, [filtered]);
 
   const move = (item: RoadmapItem, index: number) => {
     if (!isAdmin) return;
@@ -33,15 +36,13 @@ export function WorkflowView() {
     toast.success(`${item.id} → ${WORKFLOW_STAGES[clamped]!.label}`, { duration: 1600 });
   };
 
-  const drop = (moduleName: string, index: number) => {
+  const drop = (index: number) => {
     const item = filtered.find((i) => i.id === dragId);
     setDragId(null);
     setOver(null);
-    if (!item || !isAdmin || item.module !== moduleName) return;
+    if (!item || !isAdmin) return;
     move(item, index);
   };
-
-  const gridCols = `minmax(190px, 220px) repeat(${modules.length}, minmax(230px, 1fr))`;
 
   return (
     <div className="rounded-xl border bg-card shadow-sm">
@@ -49,7 +50,7 @@ export function WorkflowView() {
         <div>
           <h3 className="text-sm font-semibold">Feature Workflow</h3>
           <p className="text-xs text-muted-foreground">
-            Modules as columns, lifecycle statuses as rows
+            Status lifecycle from Business to Delivery
           </p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -67,106 +68,64 @@ export function WorkflowView() {
         </div>
       </div>
 
-      {modules.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="p-6 text-sm text-muted-foreground">No features match the current filters.</p>
       ) : (
         <div className="overflow-x-auto">
-          <div className="min-w-max">
-            {/* module header */}
-            <div
-              className="sticky top-0 z-10 grid border-b bg-card/95 backdrop-blur"
-              style={{ gridTemplateColumns: gridCols }}
-            >
-              <div className="sticky left-0 z-10 border-r bg-card/95 px-3 py-2.5 text-xs font-semibold text-muted-foreground">
-                Status
-              </div>
-              {modules.map((m) => {
-                const count = filtered.filter((i) => i.module === m).length;
-                return (
-                  <div key={m} className="border-r px-3 py-2.5 last:border-r-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-xs font-semibold" title={m}>
-                        {m}
-                      </span>
-                      <span className="rounded-full bg-surface px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
-                        {count}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* one row per lifecycle stage */}
-            {WORKFLOW_STAGES.map((s, idx) => {
-              const stageCount = filtered.filter((i) => currentStageIndex(i) === idx).length;
-              return (
-                <div
-                  key={s.key}
-                  className="grid border-b last:border-b-0"
-                  style={{ gridTemplateColumns: gridCols }}
-                >
-                  <div className="sticky left-0 z-10 border-r bg-surface/70 px-3 py-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-xs font-semibold" title={s.label}>
-                        {s.label}
-                      </span>
-                      <span className="rounded-full bg-card px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
-                        {stageCount}
-                      </span>
-                    </div>
-                    <span
-                      className={cn(
-                        "mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset",
-                        PHASE_TONE[s.phase],
-                      )}
-                    >
-                      {idx + 1} · {s.phase}
+          <div className="flex min-w-max gap-3 p-3">
+            {columns.map(({ stage, index, items }) => (
+              <section
+                key={stage.key}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setOver(stage.key);
+                }}
+                onDragLeave={() => setOver((o) => (o === stage.key ? null : o))}
+                onDrop={() => drop(index)}
+                className={cn(
+                  "flex w-64 min-w-[16rem] flex-col rounded-lg border bg-surface/50 transition-colors",
+                  over === stage.key && "bg-primary/5 ring-1 ring-primary/20",
+                )}
+              >
+                <header className="sticky top-0 z-10 rounded-t-lg border-b bg-card/95 p-2.5 backdrop-blur">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs font-semibold" title={stage.label}>
+                      {index + 1}. {stage.label}
+                    </span>
+                    <span className="rounded-full bg-surface px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
+                      {items.length}
                     </span>
                   </div>
+                  <span
+                    className={cn(
+                      "mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset",
+                      PHASE_TONE[stage.phase],
+                    )}
+                  >
+                    {stage.phase}
+                  </span>
+                </header>
 
-                  {modules.map((m) => {
-                    const cellItems = filtered.filter(
-                      (i) => i.module === m && currentStageIndex(i) === idx,
-                    );
-                    const key = `${m}::${idx}`;
-                    return (
-                      <div
-                        key={m}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          setOver(key);
-                        }}
-                        onDragLeave={() => setOver((o) => (o === key ? null : o))}
-                        onDrop={() => drop(m, idx)}
-                        className={cn(
-                          "min-h-20 space-y-2 border-r p-2 transition-colors last:border-r-0",
-                          over === key && "bg-primary/5",
-                        )}
-                      >
-                        {cellItems.map((i) => (
-                          <WorkflowCard
-                            key={i.id}
-                            item={i}
-                            index={idx}
-                            isAdmin={isAdmin}
-                            onDragStart={() => setDragId(i.id)}
-                            onMove={(next) => move(i, next)}
-                          />
-                        ))}
-                      </div>
-                    );
-                  })}
+                <div className="flex flex-1 flex-col gap-2 p-2">
+                  {items.map((i) => (
+                    <WorkflowCard
+                      key={i.id}
+                      item={i}
+                      index={index}
+                      isAdmin={isAdmin}
+                      onDragStart={() => setDragId(i.id)}
+                      onMove={(next) => move(i, next)}
+                    />
+                  ))}
                 </div>
-              );
-            })}
+              </section>
+            ))}
           </div>
         </div>
       )}
     </div>
   );
 }
-
 
 function WorkflowCard({
   item,
