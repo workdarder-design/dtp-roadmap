@@ -9,6 +9,7 @@ import {
   LifeBuoy,
   LogOut,
   Megaphone,
+  Rocket,
   Search,
   Settings,
   Table2,
@@ -28,6 +29,7 @@ const NAV = [
   { to: "/analytics", label: "Analytics", icon: BarChart3, exact: false },
   { to: "/reports", label: "Reports", icon: FileText, exact: false },
   { to: "/announcements", label: "Announcements", icon: Megaphone, exact: false },
+  { to: "/release-notes", label: "Release Notes", icon: Rocket, exact: false },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {

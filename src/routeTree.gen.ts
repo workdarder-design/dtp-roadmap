@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as ReleaseNotesRouteImport } from './routes/release-notes'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ShareTokenRouteImport } from './routes/share.$token'
@@ -29,6 +30,11 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReleaseNotesRoute = ReleaseNotesRouteImport.update({
+  id: '/release-notes',
+  path: '/release-notes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/announcements': typeof AnnouncementsRoute
+  '/release-notes': typeof ReleaseNotesRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/share/$token': typeof ShareTokenRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/announcements': typeof AnnouncementsRoute
+  '/release-notes': typeof ReleaseNotesRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/share/$token': typeof ShareTokenRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/announcements': typeof AnnouncementsRoute
+  '/release-notes': typeof ReleaseNotesRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/share/$token': typeof ShareTokenRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/announcements'
+    | '/release-notes'
     | '/reports'
     | '/settings'
     | '/share/$token'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/announcements'
+    | '/release-notes'
     | '/reports'
     | '/settings'
     | '/share/$token'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/announcements'
+    | '/release-notes'
     | '/reports'
     | '/settings'
     | '/share/$token'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
+  ReleaseNotesRoute: typeof ReleaseNotesRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   ShareTokenRoute: typeof ShareTokenRoute
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/announcements'
       fullPath: '/announcements'
       preLoaderRoute: typeof AnnouncementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/release-notes': {
+      id: '/release-notes'
+      path: '/release-notes'
+      fullPath: '/release-notes'
+      preLoaderRoute: typeof ReleaseNotesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   AnnouncementsRoute: AnnouncementsRoute,
+  ReleaseNotesRoute: ReleaseNotesRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   ShareTokenRoute: ShareTokenRoute,
