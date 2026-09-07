@@ -1,5 +1,18 @@
 import { useMemo, useState } from "react";
 import { CalendarDays, CheckCircle2, Clock, Layers, Rocket, Search, Timer } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pill, StateBadge, deliveryTone, priorityTone, businessTone, stateTone } from "./StatusBadge";
 import { useRoadmap } from "@/lib/roadmap/store";
 import { MODULES, SPRINTS, type RoadmapItem } from "@/lib/roadmap/types";
@@ -16,13 +30,25 @@ import {
   computeKpis,
   derivedState,
   formatDate,
+  groupCount,
   isCompleted,
+  isProductionReady,
+  isStagingReady,
   todayISO,
 } from "@/lib/roadmap/calculations";
 import { clientRemark } from "@/lib/roadmap/share";
 import { cn } from "@/lib/utils";
 
 const deliveryEta = (i: RoadmapItem) => i.etaProduction ?? i.etaStaging;
+
+const PALETTE = [
+  "oklch(0.52 0.11 232)",
+  "oklch(0.6 0.12 155)",
+  "oklch(0.72 0.15 65)",
+  "oklch(0.58 0.19 25)",
+  "oklch(0.55 0.1 300)",
+  "oklch(0.62 0.03 250)",
+];
 
 const barTone: Record<string, string> = {
   Completed: "bg-status-done/15 border-status-done/40",
@@ -65,7 +91,7 @@ export function ClientRoadmapView() {
       filtered
         .filter((i) => !isCompleted(i) && deliveryEta(i))
         .sort((a, b) => (deliveryEta(a) as string).localeCompare(deliveryEta(b) as string)),
-    [filtered, today],
+    [filtered],
   );
   const completed = useMemo(
     () =>
@@ -84,7 +110,7 @@ export function ClientRoadmapView() {
       label: "Next Delivery",
       value: next ? formatDate(deliveryEta(next)) : "—",
       icon: Rocket,
-      tone: "text-primary",
+      tone: "text-brand",
     },
     { label: "Upcoming Deliveries", value: upcoming.length, icon: CalendarDays, tone: "text-foreground" },
     { label: "Production Ready", value: k.productionReady, icon: Clock, tone: "text-foreground" },
@@ -92,6 +118,7 @@ export function ClientRoadmapView() {
 
   const sprintsUsed = SPRINTS.map(String).filter((s) => filtered.some((i) => i.sprint === s));
   const modulesUsed = Array.from(new Set(filtered.map((i) => i.module)));
+  const cols = sprintsUsed.length ? sprintsUsed : SPRINTS.map(String);
 
   const deliveryMix = useMemo(() => {
     const map = new Map<string, number>();
@@ -122,47 +149,54 @@ export function ClientRoadmapView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] space-y-6 px-6 py-6">
-        {/* Project overview */}
-        <section className="rounded-2xl border bg-card p-6 shadow-sm">
+      <main className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
+        {/* Project overview — gradient hero card */}
+        <section
+          className="overflow-hidden rounded-2xl p-6 text-brand-foreground shadow-md"
+          style={{
+            backgroundImage:
+              "linear-gradient(120deg, var(--brand) 0%, color-mix(in oklab, var(--brand) 70%, black) 60%, color-mix(in oklab, var(--brand) 45%, black) 100%)",
+          }}
+        >
           <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <div>
-              <h2 className="text-base font-semibold">Project Overview</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-                Delivery roadmap for the DCAA program, planned on a SAFe Program Increment across{" "}
-                {sprintsUsed.length || SPRINTS.length} sprints and {modulesUsed.length} modules. This
-                page shows scope, delivery dates for staging and production, and current progress.
+              <Pill className="border-brand-foreground/30 bg-brand-foreground/15 text-brand-foreground">PI-2026 Q3 · SAFe Program Increment</Pill>
+              <h2 className="mt-3 text-xl font-semibold">Project Overview</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-foreground/80">
+                Delivery roadmap for the DCAA program, planned across {sprintsUsed.length || SPRINTS.length}{" "}
+                sprints and {modulesUsed.length} modules. This page shows scope, delivery dates for staging
+                and production, and current progress.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {modulesUsed.map((m) => (
-                  <Pill key={m}>{m}</Pill>
+                  <Pill key={m} className="border-brand-foreground/25 bg-brand-foreground/10 text-brand-foreground">
+                    {m}
+                  </Pill>
                 ))}
               </div>
             </div>
-            <div className="rounded-xl border bg-surface p-4">
+            <div className="rounded-xl border border-brand-foreground/20 bg-brand-foreground/10 p-4 backdrop-blur-sm">
               <div className="flex items-baseline justify-between">
-                <span className="text-sm font-medium">Overall progress</span>
-                <span className="text-2xl font-semibold tabular-nums text-status-done">
-                  {k.completionPct}%
-                </span>
+                <span className="text-sm font-medium text-brand-foreground/90">Overall progress</span>
+                <span className="text-3xl font-semibold tabular-nums">{k.completionPct}%</span>
               </div>
-              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-brand-foreground/20">
                 <div
-                  className="h-full rounded-full bg-status-done transition-all"
+                  className="h-full rounded-full bg-brand-foreground transition-all"
                   style={{ width: `${k.completionPct}%` }}
                 />
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-muted-foreground">
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-brand-foreground/75">
                 <div>
-                  <div className="text-base font-semibold text-foreground tabular-nums">{k.completed}</div>
+                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">{k.completed}</div>
                   Completed
                 </div>
                 <div>
-                  <div className="text-base font-semibold text-foreground tabular-nums">{k.inProgress}</div>
+                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">{k.inProgress}</div>
                   In progress
                 </div>
                 <div>
-                  <div className="text-base font-semibold text-foreground tabular-nums">
+                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">
                     {Math.max(0, k.total - k.completed - k.inProgress)}
                   </div>
                   Planned
@@ -175,7 +209,10 @@ export function ClientRoadmapView() {
         {/* KPI cards */}
         <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
           {kpis.map((c) => (
-            <div key={c.label} className="rounded-2xl border bg-card p-4 shadow-sm">
+            <div
+              key={c.label}
+              className="rounded-2xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+            >
               <c.icon className="h-4 w-4 text-muted-foreground" />
               <div className={cn("mt-2 text-2xl font-semibold tabular-nums", c.tone)}>{c.value}</div>
               <div className="mt-1 text-xs font-medium text-muted-foreground">{c.label}</div>
@@ -183,85 +220,8 @@ export function ClientRoadmapView() {
           ))}
         </section>
 
-        {/* Next delivery */}
-        <section className="rounded-2xl border bg-card p-6 shadow-sm">
-          <h2 className="text-base font-semibold">Next Delivery</h2>
-          {next ? (
-            <div className="mt-4 grid gap-4 rounded-xl border border-primary/30 bg-primary/5 p-5 md:grid-cols-5">
-              <Field label="Feature" value={next.feature} strong />
-              <Field label="Module" value={next.module} />
-              <Field label="Sprint" value={next.sprint} />
-              <Field label="ETA" value={formatDate(deliveryEta(next)) || "—"} strong />
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Delivery Status
-                </div>
-                <div className="mt-1.5">
-                  <Pill variant={deliveryTone(next.deliveryStatus)}>
-                    {next.deliveryStatus || "Pending"}
-                  </Pill>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">No upcoming delivery in this scope.</p>
-          )}
-        </section>
-
-        {/* Delivery timeline */}
-        <section className="rounded-2xl border bg-card p-6 shadow-sm">
-          <h2 className="text-base font-semibold">Delivery Timeline</h2>
-          <p className="text-xs text-muted-foreground">Upcoming and completed deliveries across the PI</p>
-          <div className="mt-5 overflow-x-auto pb-2">
-            <div className="flex min-w-max items-stretch gap-4">
-              {(sprintsUsed.length ? sprintsUsed : SPRINTS.map(String)).map((s) => {
-                const sprintItems = filtered.filter((i) => i.sprint === s);
-                const done = sprintItems.filter(isCompleted).length;
-                return (
-                  <div key={s} className="w-64 shrink-0">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "h-3 w-3 rounded-full ring-4",
-                          done === sprintItems.length && sprintItems.length
-                            ? "bg-status-done ring-status-done/20"
-                            : "bg-primary ring-primary/15",
-                        )}
-                      />
-                      <div className="h-px flex-1 bg-border" />
-                    </div>
-                    <div className="mt-2 text-sm font-semibold">{s}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {done}/{sprintItems.length} delivered
-                    </div>
-                    <div className="mt-2 space-y-1.5">
-                      {sprintItems.map((i) => (
-                        <div
-                          key={i.id}
-                          className={cn(
-                            "truncate rounded-md border px-2 py-1 text-xs font-medium",
-                            barTone[derivedState(i)],
-                          )}
-                          title={`${i.feature} · ${formatDate(deliveryEta(i))}`}
-                        >
-                          {i.feature}
-                        </div>
-                      ))}
-                      {!sprintItems.length && (
-                        <div className="rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground">
-                          No items
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* Search & filters */}
-        <section className="rounded-2xl border bg-card p-4 shadow-sm">
+        <section className="rounded-2xl border bg-card p-3 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-[220px] flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -294,192 +254,421 @@ export function ClientRoadmapView() {
           </div>
         </section>
 
-        {/* Roadmap table */}
-        <section className="rounded-2xl border bg-card shadow-sm">
-          <div className="flex items-center justify-between border-b p-4">
-            <h2 className="text-base font-semibold">Roadmap</h2>
-            <span className="text-xs text-muted-foreground">{filtered.length} items</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px] text-sm">
-              <thead className="bg-surface text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  {["ID", "Module", "Feature", "Priority", "Sprint", "ETA Staging", "ETA Production", "Business Status", "Delivery Status", "Notes"].map(
-                    (h) => (
-                      <th key={h} className="whitespace-nowrap px-3 py-2.5 text-left font-semibold">
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((i) => (
-                  <tr key={i.id} className="border-t hover:bg-surface/60">
-                    <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-muted-foreground">{i.id}</td>
-                    <td className="whitespace-nowrap px-3 py-2.5">{i.module}</td>
-                    <td className="px-3 py-2.5 font-medium">{i.feature}</td>
-                    <td className="px-3 py-2.5">
-                      <Pill variant={priorityTone(i.priority)}>{i.priority}</Pill>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2.5">{i.sprint}</td>
-                    <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaStaging) || "—"}</td>
-                    <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaProduction) || "—"}</td>
-                    <td className="px-3 py-2.5">
-                      <Pill variant={businessTone(i.businessStatus)}>{i.businessStatus || "—"}</Pill>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <Pill variant={deliveryTone(i.deliveryStatus)}>{i.deliveryStatus || "Pending"}</Pill>
-                    </td>
-                    <td className="max-w-[260px] px-3 py-2.5 text-muted-foreground">{clientRemark(i.remarks)}</td>
-                  </tr>
-                ))}
-                {!filtered.length && (
-                  <tr>
-                    <td colSpan={10} className="px-3 py-10 text-center text-sm text-muted-foreground">
-                      No items match the current filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        {/* Tabs */}
+        <Tabs defaultValue="roadmap" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
+            <TabsTrigger value="train">SAFe Train</TabsTrigger>
+            <TabsTrigger value="deliveries">Deliveries</TabsTrigger>
+            <TabsTrigger value="insights">Insights</TabsTrigger>
+          </TabsList>
 
-        {/* SAFe program train */}
-        <section className="rounded-2xl border bg-card p-6 shadow-sm">
-          <h2 className="text-base font-semibold">SAFe Program Train</h2>
-          <p className="text-xs text-muted-foreground">PI-2026 Q3 · lanes by module</p>
-          <div className="mt-4 overflow-x-auto">
-            <div className="min-w-[900px]">
-              <div
-                className="grid gap-2 border-b pb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
-                style={{ gridTemplateColumns: `180px repeat(${(sprintsUsed.length || SPRINTS.length)}, minmax(0,1fr))` }}
-              >
-                <div />
-                {(sprintsUsed.length ? sprintsUsed : SPRINTS.map(String)).map((s) => (
-                  <div key={s}>{s}</div>
-                ))}
+          {/* Roadmap table */}
+          <TabsContent value="roadmap">
+            <section className="rounded-2xl border bg-card shadow-sm">
+              <div className="flex items-center justify-between border-b p-4">
+                <h2 className="text-base font-semibold">Roadmap</h2>
+                <span className="text-xs text-muted-foreground">{filtered.length} items</span>
               </div>
-              {modulesUsed.map((m) => (
-                <div key={m} className="border-b py-3 last:border-b-0">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1000px] text-sm">
+                  <thead className="bg-surface text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr>
+                      {["ID", "Module", "Feature", "Priority", "Sprint", "ETA Staging", "ETA Production", "Business Status", "Delivery Status", "Notes"].map(
+                        (h) => (
+                          <th key={h} className="whitespace-nowrap px-3 py-2.5 text-left font-semibold">
+                            {h}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((i) => (
+                      <tr key={i.id} className="border-t transition-colors hover:bg-surface/60">
+                        <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-muted-foreground">{i.id}</td>
+                        <td className="whitespace-nowrap px-3 py-2.5">{i.module}</td>
+                        <td className="px-3 py-2.5 font-medium">{i.feature}</td>
+                        <td className="px-3 py-2.5">
+                          <Pill variant={priorityTone(i.priority)}>{i.priority}</Pill>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2.5">{i.sprint}</td>
+                        <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaStaging) || "—"}</td>
+                        <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaProduction) || "—"}</td>
+                        <td className="px-3 py-2.5">
+                          <Pill variant={businessTone(i.businessStatus)}>{i.businessStatus || "—"}</Pill>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <Pill variant={deliveryTone(i.deliveryStatus)}>{i.deliveryStatus || "Pending"}</Pill>
+                        </td>
+                        <td className="max-w-[260px] px-3 py-2.5 text-muted-foreground">{clientRemark(i.remarks)}</td>
+                      </tr>
+                    ))}
+                    {!filtered.length && (
+                      <tr>
+                        <td colSpan={10} className="px-3 py-10 text-center text-sm text-muted-foreground">
+                          No items match the current filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </TabsContent>
+
+          {/* SAFe program train */}
+          <TabsContent value="train">
+            <section className="rounded-2xl border bg-card p-6 shadow-sm">
+              <h2 className="text-base font-semibold">SAFe Program Train</h2>
+              <p className="text-xs text-muted-foreground">PI-2026 Q3 · lanes by module</p>
+              <div className="mt-4 overflow-x-auto">
+                <div className="min-w-[900px]">
                   <div
-                    className="grid items-center gap-2"
-                    style={{ gridTemplateColumns: `180px repeat(${(sprintsUsed.length || SPRINTS.length)}, minmax(0,1fr))` }}
+                    className="grid gap-2 border-b pb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+                    style={{ gridTemplateColumns: `180px repeat(${cols.length}, minmax(0,1fr))` }}
                   >
-                    <div className="pr-2 text-sm font-semibold leading-tight">{m}</div>
-                    {(sprintsUsed.length ? sprintsUsed : SPRINTS.map(String)).map((s) => (
-                      <div key={s} className="h-1 rounded bg-surface" />
+                    <div />
+                    {cols.map((s) => (
+                      <div key={s}>{s}</div>
                     ))}
                   </div>
-                  <div className="mt-1 space-y-1.5">
-                    {filtered
-                      .filter((i) => i.module === m)
-                      .map((i) => {
-                        const cols = sprintsUsed.length ? sprintsUsed : SPRINTS.map(String);
-                        const idx = Math.max(0, cols.indexOf(i.sprint));
-                        return (
-                          <div
-                            key={i.id}
-                            className="grid gap-2"
-                            style={{ gridTemplateColumns: `180px repeat(${cols.length}, minmax(0,1fr))` }}
-                          >
-                            <div />
-                            <div style={{ gridColumnStart: idx + 2 }}>
+                  {modulesUsed.map((m) => (
+                    <div key={m} className="border-b py-3 last:border-b-0">
+                      <div
+                        className="grid items-center gap-2"
+                        style={{ gridTemplateColumns: `180px repeat(${cols.length}, minmax(0,1fr))` }}
+                      >
+                        <div className="pr-2 text-sm font-semibold leading-tight">{m}</div>
+                        {cols.map((s) => (
+                          <div key={s} className="h-1 rounded bg-surface" />
+                        ))}
+                      </div>
+                      <div className="mt-1 space-y-1.5">
+                        {filtered
+                          .filter((i) => i.module === m)
+                          .map((i) => {
+                            const idx = Math.max(0, cols.indexOf(i.sprint));
+                            return (
                               <div
-                                className={cn(
-                                  "truncate rounded-md border px-2 py-1 text-xs font-medium shadow-sm",
-                                  barTone[derivedState(i)],
-                                )}
-                                title={`${i.feature} · ${i.sprint}`}
+                                key={i.id}
+                                className="grid gap-2"
+                                style={{ gridTemplateColumns: `180px repeat(${cols.length}, minmax(0,1fr))` }}
                               >
-                                {i.feature}
+                                <div />
+                                <div style={{ gridColumnStart: idx + 2 }}>
+                                  <div
+                                    className={cn(
+                                      "truncate rounded-md border px-2 py-1 text-xs font-medium shadow-sm transition-transform hover:scale-[1.02]",
+                                      barTone[derivedState(i)],
+                                    )}
+                                    title={`${i.feature} · ${i.sprint}`}
+                                  >
+                                    {i.feature}
+                                  </div>
+                                </div>
                               </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </TabsContent>
+
+          {/* Deliveries */}
+          <TabsContent value="deliveries" className="space-y-4">
+            {/* Next delivery */}
+            <section className="rounded-2xl border bg-card p-6 shadow-sm">
+              <h2 className="text-base font-semibold">Next Delivery</h2>
+              {next ? (
+                <div className="mt-4 grid gap-4 rounded-xl border border-brand/30 bg-brand/5 p-5 md:grid-cols-5">
+                  <Field label="Feature" value={next.feature} strong />
+                  <Field label="Module" value={next.module} />
+                  <Field label="Sprint" value={next.sprint} />
+                  <Field label="ETA" value={formatDate(deliveryEta(next)) || "—"} strong />
+                  <div>
+                    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Delivery Status
+                    </div>
+                    <div className="mt-1.5">
+                      <Pill variant={deliveryTone(next.deliveryStatus)}>
+                        {next.deliveryStatus || "Pending"}
+                      </Pill>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-muted-foreground">No upcoming delivery in this scope.</p>
+              )}
+            </section>
+
+            {/* Delivery timeline */}
+            <section className="rounded-2xl border bg-card p-6 shadow-sm">
+              <h2 className="text-base font-semibold">Delivery Timeline</h2>
+              <p className="text-xs text-muted-foreground">Upcoming and completed deliveries across the PI</p>
+              <div className="mt-5 overflow-x-auto pb-2">
+                <div className="flex min-w-max items-stretch gap-4">
+                  {cols.map((s) => {
+                    const sprintItems = filtered.filter((i) => i.sprint === s);
+                    const done = sprintItems.filter(isCompleted).length;
+                    return (
+                      <div key={s} className="w-64 shrink-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              "h-3 w-3 rounded-full ring-4",
+                              done === sprintItems.length && sprintItems.length
+                                ? "bg-status-done ring-status-done/20"
+                                : "bg-brand ring-brand/15",
+                            )}
+                          />
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                        <div className="mt-2 text-sm font-semibold">{s}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {done}/{sprintItems.length} delivered
+                        </div>
+                        <div className="mt-2 space-y-1.5">
+                          {sprintItems.map((i) => (
+                            <div
+                              key={i.id}
+                              className={cn(
+                                "truncate rounded-md border px-2 py-1 text-xs font-medium transition-transform hover:scale-[1.02]",
+                                barTone[derivedState(i)],
+                              )}
+                              title={`${i.feature} · ${formatDate(deliveryEta(i))}`}
+                            >
+                              {i.feature}
                             </div>
-                          </div>
-                        );
-                      })}
-                  </div>
+                          ))}
+                          {!sprintItems.length && (
+                            <div className="rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground">
+                              No items
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              </div>
+            </section>
 
-        {/* Upcoming / Completed / Status */}
-        <section className="grid gap-4 lg:grid-cols-3">
-          <DeliveryList
-            title="Upcoming Deliveries"
-            empty="Nothing scheduled ahead."
-            items={upcoming.slice(0, 8)}
-          />
-          <DeliveryList
-            title="Completed Deliveries"
-            empty="No deliveries completed yet."
-            items={completed.slice(0, 8)}
-          />
-          <div className="rounded-2xl border bg-card p-5 shadow-sm">
-            <h3 className="text-sm font-semibold">Delivery Status</h3>
-            <div className="mt-4 space-y-3">
-              {deliveryMix.map((d) => (
-                <div key={d.name}>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium">{d.name}</span>
-                    <span className="tabular-nums text-muted-foreground">{d.value}</span>
-                  </div>
-                  <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${filtered.length ? (d.value / filtered.length) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-              {!deliveryMix.length && <p className="text-sm text-muted-foreground">No data.</p>}
-            </div>
-          </div>
-        </section>
-
-        {/* Staging & production ETA */}
-        <section className="rounded-2xl border bg-card p-6 shadow-sm">
-          <h2 className="text-base font-semibold">Staging &amp; Production ETA</h2>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
-              <thead className="bg-surface text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  {["Feature", "Module", "Sprint", "ETA Staging", "ETA Production", "State"].map((h) => (
-                    <th key={h} className="whitespace-nowrap px-3 py-2.5 text-left font-semibold">
-                      {h}
-                    </th>
+            {/* Upcoming / Completed / Status */}
+            <section className="grid gap-4 lg:grid-cols-3">
+              <DeliveryList
+                title="Upcoming Deliveries"
+                empty="Nothing scheduled ahead."
+                items={upcoming.slice(0, 8)}
+              />
+              <DeliveryList
+                title="Completed Deliveries"
+                empty="No deliveries completed yet."
+                items={completed.slice(0, 8)}
+              />
+              <div className="rounded-2xl border bg-card p-5 shadow-sm">
+                <h3 className="text-sm font-semibold">Delivery Status</h3>
+                <div className="mt-4 space-y-3">
+                  {deliveryMix.map((d) => (
+                    <div key={d.name}>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium">{d.name}</span>
+                        <span className="tabular-nums text-muted-foreground">{d.value}</span>
+                      </div>
+                      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-brand transition-all"
+                          style={{ width: `${filtered.length ? (d.value / filtered.length) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered
-                  .filter((i) => i.etaStaging || i.etaProduction)
-                  .sort((a, b) => (deliveryEta(a) ?? "").localeCompare(deliveryEta(b) ?? ""))
-                  .map((i) => (
-                    <tr key={i.id} className="border-t">
-                      <td className="px-3 py-2.5 font-medium">{i.feature}</td>
-                      <td className="whitespace-nowrap px-3 py-2.5">{i.module}</td>
-                      <td className="whitespace-nowrap px-3 py-2.5">{i.sprint}</td>
-                      <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaStaging) || "—"}</td>
-                      <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaProduction) || "—"}</td>
-                      <td className="px-3 py-2.5">
-                        <StateBadge state={derivedState(i)} />
-                      </td>
+                  {!deliveryMix.length && <p className="text-sm text-muted-foreground">No data.</p>}
+                </div>
+              </div>
+            </section>
+
+            {/* Staging & production ETA */}
+            <section className="rounded-2xl border bg-card p-6 shadow-sm">
+              <h2 className="text-base font-semibold">Staging &amp; Production ETA</h2>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[720px] text-sm">
+                  <thead className="bg-surface text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr>
+                      {["Feature", "Module", "Sprint", "ETA Staging", "ETA Production", "State"].map((h) => (
+                        <th key={h} className="whitespace-nowrap px-3 py-2.5 text-left font-semibold">
+                          {h}
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                  </thead>
+                  <tbody>
+                    {filtered
+                      .filter((i) => i.etaStaging || i.etaProduction)
+                      .sort((a, b) => (deliveryEta(a) ?? "").localeCompare(deliveryEta(b) ?? ""))
+                      .map((i) => (
+                        <tr key={i.id} className="border-t transition-colors hover:bg-surface/60">
+                          <td className="px-3 py-2.5 font-medium">{i.feature}</td>
+                          <td className="whitespace-nowrap px-3 py-2.5">{i.module}</td>
+                          <td className="whitespace-nowrap px-3 py-2.5">{i.sprint}</td>
+                          <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaStaging) || "—"}</td>
+                          <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{formatDate(i.etaProduction) || "—"}</td>
+                          <td className="px-3 py-2.5">
+                            <StateBadge state={derivedState(i)} />
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </TabsContent>
+
+          {/* Insights */}
+          <TabsContent value="insights">
+            <InsightsPanel items={filtered} />
+          </TabsContent>
+        </Tabs>
 
         <footer className="pb-8 text-center text-xs text-muted-foreground">
           Shared read-only view · DCAA Project Roadmap · PI-2026 Q3
         </footer>
       </main>
     </div>
+  );
+}
+
+function InsightsPanel({ items }: { items: RoadmapItem[] }) {
+  const k = computeKpis(items);
+  const byModule = groupCount(items, (i) => i.module);
+  const byBusiness = groupCount(items, (i) => i.businessStatus || "Unset");
+  const byPriority = groupCount(items, (i) => i.priority);
+  const byDelivery = groupCount(items, (i) => i.deliveryStatus || "Pending");
+  const bySprint = groupCount(items, (i) => i.sprint).sort((a, b) => a.name.localeCompare(b.name));
+  const readiness = [
+    { name: "Staging Ready", value: items.filter(isStagingReady).length },
+    { name: "Production Ready", value: items.filter(isProductionReady).length },
+    { name: "Not Ready", value: items.filter((i) => !isStagingReady(i) && !isProductionReady(i)).length },
+  ];
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-3">
+      <Panel title="Roadmap Completion" subtitle="Across the current scope">
+        <div className="flex items-end gap-3">
+          <span className="text-4xl font-semibold tabular-nums">{k.completionPct}%</span>
+          <span className="pb-1.5 text-xs text-muted-foreground">
+            {k.completed} of {k.total} items
+          </span>
+        </div>
+        <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-status-done transition-all"
+            style={{ width: `${k.completionPct}%` }}
+          />
+        </div>
+      </Panel>
+
+      <Panel title="Items by Module">
+        <Donut data={byModule} />
+      </Panel>
+
+      <Panel title="Delivery Status">
+        <Donut data={byDelivery} />
+      </Panel>
+
+      <Panel title="Business Status" subtitle="Distribution across the intake pipeline">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={byBusiness} layout="vertical" margin={{ left: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.3} />
+            <XAxis type="number" allowDecimals={false} fontSize={11} />
+            <YAxis type="category" dataKey="name" width={110} fontSize={11} />
+            <Tooltip />
+            <Bar dataKey="value" fill={PALETTE[0]} radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      <Panel title="Priority Distribution">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={byPriority}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+            <XAxis dataKey="name" fontSize={11} />
+            <YAxis allowDecimals={false} fontSize={11} />
+            <Tooltip />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {byPriority.map((d, idx) => (
+                <Cell key={d.name} fill={PALETTE[idx % PALETTE.length]} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      <Panel title="Sprint Distribution">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={bySprint}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+            <XAxis dataKey="name" fontSize={11} />
+            <YAxis allowDecimals={false} fontSize={11} />
+            <Tooltip />
+            <Bar dataKey="value" fill={PALETTE[1]} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      <Panel title="Staging vs Production Readiness">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={readiness}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+            <XAxis dataKey="name" fontSize={11} />
+            <YAxis allowDecimals={false} fontSize={11} />
+            <Tooltip />
+            <Bar dataKey="value" fill={PALETTE[2]} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      <Panel title="Status Mix" subtitle="Roadmap health at a glance">
+        <div className="flex flex-wrap gap-2">
+          {groupCount(items, (i) => derivedState(i)).map((d) => (
+            <Pill key={d.name} variant={stateTone(d.name as never)}>
+              {d.name}: {d.value}
+            </Pill>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function Panel({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border bg-card p-4 shadow-sm">
+      <header className="mb-3">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function Donut({ data }: { data: { name: string; value: number }[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={220}>
+      <PieChart>
+        <Pie data={data} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
+          {data.map((d, i) => (
+            <Cell key={d.name} fill={PALETTE[i % PALETTE.length]} />
+          ))}
+        </Pie>
+        <Tooltip />
+        <Legend wrapperStyle={{ fontSize: 11 }} />
+      </PieChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -534,7 +723,7 @@ function DeliveryList({
       <h3 className="text-sm font-semibold">{title}</h3>
       <div className="mt-4 space-y-3">
         {items.map((i) => (
-          <div key={i.id} className="rounded-xl border bg-surface/60 p-3">
+          <div key={i.id} className="rounded-xl border bg-surface/60 p-3 transition-shadow hover:shadow-sm">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{i.feature}</div>
