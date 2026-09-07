@@ -36,7 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     exact ? pathname === to : pathname.startsWith(to);
 
   return (
-    <div className="min-h-screen bg-[oklch(0.955_0.015_185)]">
+    <div className="min-h-screen bg-surface">
       {/* Left icon rail */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-16 flex-col items-center py-4 md:flex">
         <Link
