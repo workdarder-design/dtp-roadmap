@@ -41,13 +41,15 @@ export function WorkflowView() {
     move(item, index);
   };
 
+  const gridCols = `minmax(190px, 220px) repeat(${modules.length}, minmax(230px, 1fr))`;
+
   return (
     <div className="rounded-xl border bg-card shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b p-3">
         <div>
           <h3 className="text-sm font-semibold">Feature Workflow</h3>
           <p className="text-xs text-muted-foreground">
-            Full lifecycle from business intake to production, grouped by module
+            Modules as columns, lifecycle statuses as rows
           </p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -65,58 +67,72 @@ export function WorkflowView() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-max">
-          {/* stage header */}
-          <div
-            className="sticky top-0 z-10 grid border-b bg-card/95 backdrop-blur"
-            style={{ gridTemplateColumns: `repeat(${WORKFLOW_STAGES.length}, minmax(210px, 1fr))` }}
-          >
+      {modules.length === 0 ? (
+        <p className="p-6 text-sm text-muted-foreground">No features match the current filters.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="min-w-max">
+            {/* module header */}
+            <div
+              className="sticky top-0 z-10 grid border-b bg-card/95 backdrop-blur"
+              style={{ gridTemplateColumns: gridCols }}
+            >
+              <div className="sticky left-0 z-10 border-r bg-card/95 px-3 py-2.5 text-xs font-semibold text-muted-foreground">
+                Status
+              </div>
+              {modules.map((m) => {
+                const count = filtered.filter((i) => i.module === m).length;
+                return (
+                  <div key={m} className="border-r px-3 py-2.5 last:border-r-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-xs font-semibold" title={m}>
+                        {m}
+                      </span>
+                      <span className="rounded-full bg-surface px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
+                        {count}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* one row per lifecycle stage */}
             {WORKFLOW_STAGES.map((s, idx) => {
-              const count = filtered.filter((i) => currentStageIndex(i) === idx).length;
+              const stageCount = filtered.filter((i) => currentStageIndex(i) === idx).length;
               return (
-                <div key={s.key} className="border-r px-3 py-2.5 last:border-r-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs font-semibold">{s.label}</span>
-                    <span className="rounded-full bg-surface px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
-                      {count}
+                <div
+                  key={s.key}
+                  className="grid border-b last:border-b-0"
+                  style={{ gridTemplateColumns: gridCols }}
+                >
+                  <div className="sticky left-0 z-10 border-r bg-surface/70 px-3 py-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-xs font-semibold" title={s.label}>
+                        {s.label}
+                      </span>
+                      <span className="rounded-full bg-card px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
+                        {stageCount}
+                      </span>
+                    </div>
+                    <span
+                      className={cn(
+                        "mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset",
+                        PHASE_TONE[s.phase],
+                      )}
+                    >
+                      {idx + 1} · {s.phase}
                     </span>
                   </div>
-                  <span
-                    className={cn(
-                      "mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset",
-                      PHASE_TONE[s.phase],
-                    )}
-                  >
-                    {idx + 1} · {s.phase}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
 
-          {modules.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">No features match the current filters.</p>
-          )}
-
-          {modules.map((m) => {
-            const items = filtered.filter((i) => i.module === m);
-            return (
-              <div key={m} className="border-b last:border-b-0">
-                <div className="sticky left-0 flex items-center gap-2 bg-surface/70 px-3 py-1.5">
-                  <span className="text-xs font-semibold">{m}</span>
-                  <span className="text-[11px] text-muted-foreground">{items.length} features</span>
-                </div>
-                <div
-                  className="grid"
-                  style={{ gridTemplateColumns: `repeat(${WORKFLOW_STAGES.length}, minmax(210px, 1fr))` }}
-                >
-                  {WORKFLOW_STAGES.map((s, idx) => {
-                    const cellItems = items.filter((i) => currentStageIndex(i) === idx);
+                  {modules.map((m) => {
+                    const cellItems = filtered.filter(
+                      (i) => i.module === m && currentStageIndex(i) === idx,
+                    );
                     const key = `${m}::${idx}`;
                     return (
                       <div
-                        key={s.key}
+                        key={m}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setOver(key);
@@ -124,7 +140,7 @@ export function WorkflowView() {
                         onDragLeave={() => setOver((o) => (o === key ? null : o))}
                         onDrop={() => drop(m, idx)}
                         className={cn(
-                          "min-h-24 space-y-2 border-r p-2 transition-colors last:border-r-0",
+                          "min-h-20 space-y-2 border-r p-2 transition-colors last:border-r-0",
                           over === key && "bg-primary/5",
                         )}
                       >
@@ -142,14 +158,15 @@ export function WorkflowView() {
                     );
                   })}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
+
 
 function WorkflowCard({
   item,
