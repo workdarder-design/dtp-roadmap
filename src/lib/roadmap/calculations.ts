@@ -78,6 +78,15 @@ export function applyFilters(items: RoadmapItem[], f: RoadmapFilterState): Roadm
     if (f.module !== "all" && i.module !== f.module) return false;
     if (f.priority !== "all" && i.priority !== f.priority) return false;
     if (f.status !== "all" && derivedState(i) !== f.status) return false;
+    if (f.businessStatus !== "all" && (i.businessStatus || "Unset") !== f.businessStatus) return false;
+    if (f.devStatus !== "all" && (i.devStatus || "Unset") !== f.devStatus) return false;
+    if (f.deliveryStatus !== "all" && (i.deliveryStatus || "Unset") !== f.deliveryStatus) return false;
+    if (f.etaFrom || f.etaTo) {
+      const eta = i.etaProduction ?? i.etaStaging;
+      if (!eta) return false;
+      if (f.etaFrom && eta < f.etaFrom) return false;
+      if (f.etaTo && eta > f.etaTo) return false;
+    }
     if (f.search.trim()) {
       const q = f.search.toLowerCase();
       const hay = [i.id, i.module, i.feature, i.sprint, i.remarks, i.businessStatus, i.devStatus, i.deliveryStatus]
