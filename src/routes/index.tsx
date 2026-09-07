@@ -1,24 +1,93 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
+import { RoadmapKpis } from "@/components/roadmap/RoadmapKpis";
+import { RoadmapFilters } from "@/components/roadmap/RoadmapFilters";
+import { RoadmapTable } from "@/components/roadmap/RoadmapTable";
+import { SafeTrainView } from "@/components/roadmap/SafeTrainView";
+import { TimelineView } from "@/components/roadmap/TimelineView";
+import { KanbanView } from "@/components/roadmap/KanbanView";
+import { AnalyticsView } from "@/components/roadmap/AnalyticsView";
+import { RoadmapItemModal } from "@/components/roadmap/RoadmapItemModal";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useRoadmap } from "@/lib/roadmap/store";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Roadmap — DCAA Project Roadmap" },
+      {
+        name: "description",
+        content:
+          "SAFe program roadmap for DCAA: table, program train, timeline, kanban and analytics in one screen.",
+      },
+      { property: "og:title", content: "Roadmap — DCAA Project Roadmap" },
+      {
+        property: "og:description",
+        content: "Manage the DCAA SAFe roadmap: features, sprints, statuses and delivery dates.",
+      },
+    ],
+  }),
+  component: RoadmapPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function RoadmapPage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <AppShell>
+      <RoadmapWorkspace />
+    </AppShell>
+  );
+}
+
+function RoadmapWorkspace() {
+  const { filtered, isAdmin } = useRoadmap();
+  const [addOpen, setAddOpen] = useState(false);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold">Program Roadmap</h2>
+          <p className="text-sm text-muted-foreground">
+            PI-2026 Q3 · {filtered.length} items in current scope
+          </p>
+        </div>
+        <Button onClick={() => setAddOpen(true)} disabled={!isAdmin}>
+          <Plus className="mr-1.5 h-4 w-4" /> Add Roadmap Item
+        </Button>
+      </div>
+
+      <RoadmapKpis items={filtered} />
+      <RoadmapFilters />
+
+      <Tabs defaultValue="table" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="table">Table</TabsTrigger>
+          <TabsTrigger value="train">SAFe Train</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="kanban">Kanban</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+        <TabsContent value="table">
+          <RoadmapTable />
+        </TabsContent>
+        <TabsContent value="train">
+          <SafeTrainView />
+        </TabsContent>
+        <TabsContent value="timeline">
+          <TimelineView />
+        </TabsContent>
+        <TabsContent value="kanban">
+          <KanbanView />
+        </TabsContent>
+        <TabsContent value="analytics">
+          <AnalyticsView />
+        </TabsContent>
+      </Tabs>
+
+      <RoadmapItemModal open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
 }
