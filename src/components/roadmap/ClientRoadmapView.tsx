@@ -129,14 +129,6 @@ export function ClientRoadmapView() {
   const modulesUsed = Array.from(new Set(filtered.map((i) => i.module)));
   const cols = sprintsUsed.length ? sprintsUsed : SPRINTS.map(String);
 
-  const deliveryMix = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const i of filtered) {
-      const key = i.deliveryStatus || "Pending";
-      map.set(key, (map.get(key) ?? 0) + 1);
-    }
-    return Array.from(map, ([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [filtered]);
 
   return (
     <div className="min-h-screen bg-surface">
