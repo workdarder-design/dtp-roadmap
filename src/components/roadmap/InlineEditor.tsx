@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/roadmap/calculations";
-import { Pill } from "./StatusBadge";
 
 const EMPTY = "__empty__";
 
@@ -170,7 +169,7 @@ export function InlineText({
             !value && "text-muted-foreground",
           )}
         >
-          {value ? <Pill variant="planned">{value}</Pill> : placeholder}
+          {value || placeholder}
         </button>
         <SavedFlash show={saved} />
       </div>
