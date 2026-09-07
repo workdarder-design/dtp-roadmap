@@ -41,7 +41,10 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as RoadmapItem[]);
+      if (raw)
+        setItems(
+          (JSON.parse(raw) as RoadmapItem[]).map((i) => ({ ...i, module: normalizeModule(i.module) })),
+        );
     } catch {
       /* ignore */
     }
