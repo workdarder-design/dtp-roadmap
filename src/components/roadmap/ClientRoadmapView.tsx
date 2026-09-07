@@ -551,6 +551,10 @@ export function ClientRoadmapView() {
           <TabsContent value="insights">
             <InsightsPanel items={filtered} />
           </TabsContent>
+
+          <TabsContent value="workflow">
+            <ClientWorkflowDiagram items={filtered} />
+          </TabsContent>
         </Tabs>
 
         <footer className="pb-8 text-center text-xs text-muted-foreground">
