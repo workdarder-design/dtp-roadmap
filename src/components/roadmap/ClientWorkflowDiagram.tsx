@@ -107,7 +107,7 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
         {activeStage ? (
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {activeItems.map((i) => (
-              <FeatureCard key={i.id} item={i} />
+              <FeatureCard key={i.id} item={i} tone={stageTone[activeStage.key]} />
             ))}
             {!activeItems.length && (
               <p className="text-sm text-muted-foreground">No features in this stage.</p>
@@ -115,19 +115,22 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
           </div>
         ) : (
           <div className="mt-3 space-y-4">
-            {WORKFLOW_STAGES.filter((s) => (grouped.get(s.key) ?? []).length).map((s) => (
-              <div key={s.key}>
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <CircleDot className="size-3.5 text-primary" />
-                  {s.label} ({(grouped.get(s.key) ?? []).length})
+            {WORKFLOW_STAGES.filter((s) => (grouped.get(s.key) ?? []).length).map((s) => {
+              const tone = stageTone[s.key];
+              return (
+                <div key={s.key}>
+                  <div className={cn("mb-2 flex items-center gap-2 text-xs font-medium", tone?.text ?? "text-muted-foreground")}>
+                    <CircleDot className={cn("size-3.5", tone?.dot ?? "text-primary")} />
+                    {s.label} ({(grouped.get(s.key) ?? []).length})
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {(grouped.get(s.key) ?? []).map((i) => (
+                      <FeatureCard key={i.id} item={i} tone={tone} />
+                    ))}
+                  </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {(grouped.get(s.key) ?? []).map((i) => (
-                    <FeatureCard key={i.id} item={i} />
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {!items.length && <p className="text-sm text-muted-foreground">No features to show.</p>}
           </div>
         )}
