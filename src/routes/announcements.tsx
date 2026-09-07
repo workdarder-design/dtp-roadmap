@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, Eye, Megaphone, Send } from "lucide-react";
+import { Code2, Copy, Eye, Megaphone, Send } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { useAnnouncements } from "@/lib/roadmap/useAnnouncements";
 import {
   ANNOUNCEMENT_STATUSES,
   announcementEmail,
+  announcementEmailHtml,
   announcementSubject,
   type AnnouncementStatus,
   type SprintAnnouncement,
