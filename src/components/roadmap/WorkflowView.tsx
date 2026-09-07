@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { useRoadmap } from "@/lib/roadmap/store";
 import type { RoadmapItem } from "@/lib/roadmap/types";
 import { formatDate } from "@/lib/roadmap/calculations";
@@ -234,7 +234,7 @@ function WorkflowCard({
             onClick={() => onMove(index - 1)}
             aria-label={`Move ${item.id} back`}
           >
-            <ChevronLeft className="h-3.5 w-3.5" />
+            <ChevronUp className="h-3.5 w-3.5" />
           </Button>
           <select
             value={index}
@@ -256,7 +256,7 @@ function WorkflowCard({
             onClick={() => onMove(index + 1)}
             aria-label={`Move ${item.id} forward`}
           >
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronDown className="h-3.5 w-3.5" />
           </Button>
         </div>
       )}
