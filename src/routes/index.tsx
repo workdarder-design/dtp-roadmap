@@ -52,7 +52,7 @@ function RoadmapWorkspace() {
         <div className="min-w-0">
           <h2 className="truncate text-lg font-semibold">Program Roadmap</h2>
           <p className="text-sm text-muted-foreground">
-            PI-2026 Q3 · {filtered.length} items in current scope
+            {filtered.length} items in current scope
           </p>
         </div>
         <div className="flex items-center gap-2">

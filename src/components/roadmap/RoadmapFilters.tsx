@@ -17,7 +17,6 @@ import {
   DEFAULT_FILTERS,
   DELIVERY_STATUSES,
   DEV_STATUSES,
-  PIS,
   PRIORITIES,
   SPRINTS,
   type RoadmapFilterState,
@@ -93,16 +92,13 @@ export function RoadmapFilters() {
         ? Array.from(new Set(items.map((i) => i.feature)))
         : draft.scopeType === "sprint"
           ? Array.from(new Set(items.map((i) => i.sprint)))
-          : draft.scopeType === "pi"
-            ? Array.from(new Set(items.map((i) => i.pi)))
-            : [];
+          : [];
 
   const chips = useMemo<Chip[]>(() => {
     const list: Chip[] = [];
     if (filters.scopeType !== "project" && filters.scopeValue)
       list.push({ key: "scopeValue", label: `${SCOPE_LABELS[filters.scopeType]}: ${filters.scopeValue}` });
     if (filters.module !== "all") list.push({ key: "module", label: `Module: ${filters.module}` });
-    if (filters.pi !== "all") list.push({ key: "pi", label: filters.pi });
     if (filters.sprint !== "all") list.push({ key: "sprint", label: filters.sprint });
     if (filters.priority !== "all") list.push({ key: "priority", label: `Priority: ${filters.priority}` });
     if (filters.status !== "all") list.push({ key: "status", label: filters.status });
@@ -238,9 +234,6 @@ export function RoadmapFilters() {
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="PI">
-                <FilterSelect value={draft.pi} onChange={(v) => patch({ pi: v })} allLabel="All PIs" options={PIS} />
-              </Field>
               <Field label="Sprint">
                 <FilterSelect
                   value={draft.sprint}

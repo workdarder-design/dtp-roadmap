@@ -139,7 +139,7 @@ export function ClientRoadmapView() {
             </div>
             <div>
               <h1 className="text-lg font-semibold leading-tight">DCAA Project Roadmap</h1>
-              <p className="text-xs text-muted-foreground">Client view · PI-2026 Q3 · SAFe</p>
+              <p className="text-xs text-muted-foreground">Client view · SAFe</p>
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -160,7 +160,7 @@ export function ClientRoadmapView() {
         >
           <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <div>
-              <Pill className="border-brand-foreground/30 bg-brand-foreground/15 text-brand-foreground">PI-2026 Q3 · SAFe Program Increment</Pill>
+              <Pill className="border-brand-foreground/30 bg-brand-foreground/15 text-brand-foreground">SAFe Program Train</Pill>
               <h2 className="mt-3 text-xl font-semibold">Project Overview</h2>
               <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-foreground/80">
                 Delivery roadmap for the DCAA program, planned across {sprintsUsed.length || SPRINTS.length}{" "}
@@ -321,7 +321,7 @@ export function ClientRoadmapView() {
           <TabsContent value="train">
             <section className="rounded-2xl border bg-card p-6 shadow-sm">
               <h2 className="text-base font-semibold">SAFe Program Train</h2>
-              <p className="text-xs text-muted-foreground">PI-2026 Q3 · lanes by module</p>
+              <p className="text-xs text-muted-foreground">Lanes by module</p>
               <div className="mt-4 overflow-x-auto">
                 <div className="min-w-[900px]">
                   <div
@@ -408,7 +408,7 @@ export function ClientRoadmapView() {
             {/* Delivery timeline */}
             <section className="rounded-2xl border bg-card p-6 shadow-sm">
               <h2 className="text-base font-semibold">Delivery Timeline</h2>
-              <p className="text-xs text-muted-foreground">Upcoming and completed deliveries across the PI</p>
+              <p className="text-xs text-muted-foreground">Upcoming and completed deliveries</p>
               <div className="mt-5 overflow-x-auto pb-2">
                 <div className="flex min-w-max items-stretch gap-4">
                   {cols.map((s) => {
@@ -534,7 +534,7 @@ export function ClientRoadmapView() {
         </Tabs>
 
         <footer className="pb-8 text-center text-xs text-muted-foreground">
-          Shared read-only view · DCAA Project Roadmap · PI-2026 Q3
+          Shared read-only view · DCAA Project Roadmap
         </footer>
       </main>
     </div>

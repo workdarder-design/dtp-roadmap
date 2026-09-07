@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRoadmap } from "@/lib/roadmap/store";
-import { MODULES, PIS, SPRINTS } from "@/lib/roadmap/types";
+import { MODULES, SPRINTS } from "@/lib/roadmap/types";
 import { Pill } from "@/components/roadmap/StatusBadge";
 import { toast } from "sonner";
 
@@ -65,13 +65,8 @@ function Body() {
       </section>
 
       <section className="space-y-3 rounded-xl border bg-card p-4 shadow-sm">
-        <h3 className="text-sm font-semibold">Program Increment</h3>
+        <h3 className="text-sm font-semibold">Sprints</h3>
         <div className="flex flex-wrap gap-1.5">
-          {PIS.map((p) => (
-            <Pill key={p} variant="progress">
-              {p}
-            </Pill>
-          ))}
           {SPRINTS.map((s) => (
             <Pill key={s}>{s}</Pill>
           ))}

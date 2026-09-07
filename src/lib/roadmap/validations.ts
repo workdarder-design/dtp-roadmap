@@ -7,7 +7,6 @@ export const roadmapItemSchema = z.object({
   feature: z.string().min(2, "Feature is required"),
   priority: z.enum(PRIORITIES),
   sprint: z.string().min(1, "Sprint is required"),
-  pi: z.string().min(1, "PI is required"),
   etaStaging: z.string(),
   etaProduction: z.string(),
   businessStatus: z.enum(BUSINESS_STATUSES),
