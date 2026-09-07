@@ -8,6 +8,7 @@ import { RoadmapTable } from "@/components/roadmap/RoadmapTable";
 import { SafeTrainView } from "@/components/roadmap/SafeTrainView";
 import { TimelineView } from "@/components/roadmap/TimelineView";
 import { KanbanView } from "@/components/roadmap/KanbanView";
+import { WorkflowView } from "@/components/roadmap/WorkflowView";
 import { AnalyticsView } from "@/components/roadmap/AnalyticsView";
 import { RoadmapItemModal } from "@/components/roadmap/RoadmapItemModal";
 import { ShareRoadmapDialog } from "@/components/roadmap/ShareRoadmapDialog";
@@ -72,6 +73,7 @@ function RoadmapWorkspace() {
           <TabsTrigger value="train">SAFe Train</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="kanban">Kanban</TabsTrigger>
+          <TabsTrigger value="workflow">Workflow</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         <TabsContent value="table">
@@ -85,6 +87,9 @@ function RoadmapWorkspace() {
         </TabsContent>
         <TabsContent value="kanban">
           <KanbanView />
+        </TabsContent>
+        <TabsContent value="workflow">
+          <WorkflowView />
         </TabsContent>
         <TabsContent value="analytics">
           <AnalyticsView />
