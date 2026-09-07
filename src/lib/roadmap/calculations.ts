@@ -125,5 +125,5 @@ export function nextDelivery(items: RoadmapItem[]): RoadmapItem | null {
   const eta = (i: RoadmapItem) => (i.etaProduction ?? i.etaStaging)!;
   const upcoming = dated.filter((i) => eta(i) >= todayISO());
   const pool = upcoming.length ? upcoming : dated;
-  return pool.sort((a, b) => eta(a).localeCompare(eta(b)))[0];
+  return pool.sort((a, b) => eta(a).localeCompare(eta(b)))[0] ?? null;
 }
