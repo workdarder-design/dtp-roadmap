@@ -23,6 +23,7 @@ import {
   isStagingReady,
   isProductionReady,
 } from "@/lib/roadmap/calculations";
+import { displayDevStatus } from "@/lib/roadmap/types";
 import { Progress } from "@/components/ui/progress";
 import { Pill, priorityTone, stateTone } from "./StatusBadge";
 
@@ -56,7 +57,7 @@ export function AnalyticsView() {
   const kpi = computeKpis(filtered);
 
   const byModule = groupCount(filtered, (i) => i.module);
-  const byDev = groupCount(filtered, (i) => i.devStatus || "Unset");
+  const byDev = groupCount(filtered, (i) => displayDevStatus(i.devStatus) || "Unset");
   const byBusiness = groupCount(filtered, (i) => i.businessStatus || "Unset");
   const byPriority = groupCount(filtered, (i) => i.priority);
   const byDelivery = groupCount(filtered, (i) => i.deliveryStatus || "Unset");

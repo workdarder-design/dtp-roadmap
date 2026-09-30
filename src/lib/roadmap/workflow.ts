@@ -16,7 +16,7 @@ export const WORKFLOW_STAGES: WorkflowStage[] = [
   { key: "validation", label: "Validation", phase: "Business", business: "Validation", dev: "Not Started", delivery: "Pending" },
   { key: "planned", label: "Planned", phase: "Business", business: "Planned", dev: "Not Started", delivery: "Pending" },
   { key: "in-progress", label: "In Progress", phase: "Development", business: "Planned", dev: "In Progress", delivery: "Pending" },
-  { key: "done", label: "Done", phase: "Development", business: "Planned", dev: "Done", delivery: "Pending" },
+  { key: "done", label: "Dev-Done", phase: "Development", business: "Planned", dev: "Done", delivery: "Pending" },
   { key: "uat", label: "Ready for UAT", phase: "Delivery", business: "Planned", dev: "Done", delivery: "Ready for UAT" },
   { key: "handover", label: "Handover to Client", phase: "Delivery", business: "Planned", dev: "Done", delivery: "Handover (to Client)" },
   { key: "production", label: "Production", phase: "Delivery", business: "Planned", dev: "Done", delivery: "Production" },

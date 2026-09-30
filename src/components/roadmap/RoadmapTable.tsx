@@ -25,6 +25,7 @@ import {
   BUSINESS_STATUSES,
   DELIVERY_STATUSES,
   DEV_STATUSES,
+  displayDevStatus,
   PRIORITIES,
   type RoadmapItem,
 } from "@/lib/roadmap/types";
@@ -179,7 +180,7 @@ export function RoadmapTable() {
             value={item.devStatus}
             options={DEV_STATUSES}
             onChange={(v) => set(item, { devStatus: v as RoadmapItem["devStatus"] })}
-            render={(v) => (v ? <Pill variant={devTone(v)}>{v}</Pill> : <span className="text-muted-foreground">—</span>)}
+            render={(v) => (v ? <Pill variant={devTone(v)}>{displayDevStatus(v)}</Pill> : <span className="text-muted-foreground">—</span>)}
           />
         );
       case "deliveryStatus":

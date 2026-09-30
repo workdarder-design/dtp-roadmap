@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRoadmap } from "@/lib/roadmap/store";
-import type { RoadmapItem } from "@/lib/roadmap/types";
+import { displayDevStatus, type RoadmapItem } from "@/lib/roadmap/types";
 import { formatDate } from "@/lib/roadmap/calculations";
 import { Pill, deliveryTone, priorityTone } from "./StatusBadge";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ export function KanbanView() {
   const drop = (col: (typeof COLUMNS)[number]) => {
     if (!dragId || !isAdmin) return;
     updateItem(dragId, { devStatus: col });
-    toast.success(`${dragId} moved to ${col}`);
+    toast.success(`${dragId} moved to ${displayDevStatus(col)}`);
     setDragId(null);
     setOver(null);
   };
@@ -43,7 +43,7 @@ export function KanbanView() {
             )}
           >
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">{col}</h3>
+              <h3 className="text-sm font-semibold">{displayDevStatus(col)}</h3>
               <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border">
                 {items.length}
               </span>

@@ -25,7 +25,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useRoadmap } from "@/lib/roadmap/store";
-import type { Priority, RoadmapItem } from "@/lib/roadmap/types";
+import { displayDevStatus, type Priority, type RoadmapItem } from "@/lib/roadmap/types";
 import { formatDate } from "@/lib/roadmap/calculations";
 import {
   WORKFLOW_STAGES,
@@ -1168,7 +1168,7 @@ function FeatureJourneyView({
 
                   <div className="mt-2 text-xs text-muted-foreground">
                     <span>
-                      Mapping: Business [{stage.business}] • Dev [{stage.dev}] • Delivery [
+                      Mapping: Business [{stage.business}] • Dev [{displayDevStatus(stage.dev)}] • Delivery [
                       {stage.delivery}]
                     </span>
                   </div>

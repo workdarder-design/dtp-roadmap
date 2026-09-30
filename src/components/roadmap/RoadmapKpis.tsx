@@ -91,7 +91,7 @@ export function RoadmapKpis({ items }: { items: RoadmapItem[] }) {
       icon: CircleDashed,
       iconTone: "bg-muted text-foreground",
       value: String(k.stagingReady),
-      sub: "Done with staging ETA",
+      sub: "Dev-Done with staging ETA",
     },
     {
       title: "Production Ready",

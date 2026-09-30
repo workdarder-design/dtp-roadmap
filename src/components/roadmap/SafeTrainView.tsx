@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRoadmap } from "@/lib/roadmap/store";
-import type { RoadmapItem } from "@/lib/roadmap/types";
+import { displayDevStatus, type RoadmapItem } from "@/lib/roadmap/types";
 import { derivedState, formatDate } from "@/lib/roadmap/calculations";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Button } from "@/components/ui/button";
@@ -134,7 +134,7 @@ export function SafeTrainView() {
                                   <Row k="Staging ETA" v={formatDate(i.etaStaging) || "—"} />
                                   <Row k="Production ETA" v={formatDate(i.etaProduction) || "—"} />
                                   <Row k="Business" v={i.businessStatus || "—"} />
-                                  <Row k="Dev" v={i.devStatus || "—"} />
+                                  <Row k="Dev" v={displayDevStatus(i.devStatus) || "—"} />
                                   <Row k="Delivery" v={i.deliveryStatus || "—"} />
                                 </dl>
                               </HoverCardContent>

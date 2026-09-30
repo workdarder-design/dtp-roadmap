@@ -17,6 +17,7 @@ import {
   DEFAULT_FILTERS,
   DELIVERY_STATUSES,
   DEV_STATUSES,
+  displayDevStatus,
   PRIORITIES,
   type RoadmapFilterState,
   type ScopeType,
@@ -61,7 +62,7 @@ function FilterSelect({
           .filter((o) => o !== "")
           .map((o) => (
             <SelectItem key={o} value={o}>
-              {o}
+              {displayDevStatus(o)}
             </SelectItem>
           ))}
       </SelectContent>
@@ -102,7 +103,7 @@ export function RoadmapFilters() {
     if (filters.status !== "all") list.push({ key: "status", label: filters.status });
     if (filters.businessStatus !== "all")
       list.push({ key: "businessStatus", label: `Business: ${filters.businessStatus}` });
-    if (filters.devStatus !== "all") list.push({ key: "devStatus", label: `Dev: ${filters.devStatus}` });
+    if (filters.devStatus !== "all") list.push({ key: "devStatus", label: `Dev: ${displayDevStatus(filters.devStatus)}` });
     if (filters.deliveryStatus !== "all")
       list.push({ key: "deliveryStatus", label: `Delivery: ${filters.deliveryStatus}` });
     if (filters.etaFrom || filters.etaTo)

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/roadmap/calculations";
+import { displayDevStatus } from "@/lib/roadmap/types";
 
 const EMPTY = "__empty__";
 
@@ -44,7 +45,7 @@ export function InlineSelect({
   placeholder?: string;
 }) {
   const { saved, flash } = useSavedFlash();
-  const display = render ? render(value) : <span>{value || placeholder}</span>;
+  const display = render ? render(value) : <span>{displayDevStatus(value) || placeholder}</span>;
 
   if (!editable) return <>{display}</>;
 
@@ -66,7 +67,7 @@ export function InlineSelect({
         <SelectContent className="max-h-72">
           {options.map((o) => (
             <SelectItem key={o || EMPTY} value={o === "" ? EMPTY : o}>
-              {o || "— None —"}
+              {displayDevStatus(o) || "— None —"}
             </SelectItem>
           ))}
         </SelectContent>

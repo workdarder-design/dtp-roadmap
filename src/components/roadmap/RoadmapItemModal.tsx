@@ -21,6 +21,7 @@ import {
   BUSINESS_STATUSES,
   DELIVERY_STATUSES,
   DEV_STATUSES,
+  displayDevStatus,
   PRIORITIES,
   type RoadmapItem,
 } from "@/lib/roadmap/types";
@@ -94,7 +95,7 @@ export function RoadmapItemModal({
         <SelectContent className="max-h-72">
           {options.map((o) => (
             <SelectItem key={o || NONE} value={o === "" ? NONE : o}>
-              {o || "— None —"}
+              {displayDevStatus(o) || "— None —"}
             </SelectItem>
           ))}
         </SelectContent>

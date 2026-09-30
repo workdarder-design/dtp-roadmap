@@ -20,6 +20,12 @@ export type BusinessStatus = (typeof BUSINESS_STATUSES)[number];
 export const DEV_STATUSES = ["", "Not Started", "In Progress", "Blocked", "Done"] as const;
 export type DevStatus = (typeof DEV_STATUSES)[number];
 
+/** User-facing label. Stored dev status stays "Done". */
+export function displayDevStatus(status: string | null | undefined): string {
+  if (status === "Done") return "Dev-Done";
+  return status ?? "";
+}
+
 export const DELIVERY_STATUSES = [
   "",
   "Pending",

@@ -88,15 +88,23 @@ const stageTone: Record<
     dot: "text-emerald-600",
     ring: "ring-emerald-300/50",
   },
-  completed: {
-    border: "border-lime-200",
-    bg: "bg-lime-50/80",
-    text: "text-lime-900",
-    bar: "bg-lime-500",
-    dot: "text-lime-600",
-    ring: "ring-lime-300/50",
-  },
 };
+
+/** Client view ends at Production. Completed stays off this diagram. */
+const CLIENT_WORKFLOW_STAGES = WORKFLOW_STAGES.filter((s) => s.key !== "completed");
+
+function clientStageFor(item: RoadmapItem): WorkflowStage {
+  const stage = WORKFLOW_STAGES[currentStageIndex(item)];
+  if (!stage || stage.key === "completed") {
+    return CLIENT_WORKFLOW_STAGES.find((s) => s.key === "production") ?? CLIENT_WORKFLOW_STAGES.at(-1)!;
+  }
+  return CLIENT_WORKFLOW_STAGES.find((s) => s.key === stage.key) ?? stage;
+}
+
+function clientStageIndex(item: RoadmapItem): number {
+  const idx = CLIENT_WORKFLOW_STAGES.findIndex((s) => s.key === clientStageFor(item).key);
+  return idx < 0 ? 0 : idx;
+}
 
 type StageRailState = "completed" | "current" | "upcoming" | "partial";
 
@@ -106,7 +114,7 @@ function stageRailState(items: RoadmapItem[], stageIndex: number): StageRailStat
   let past = 0;
   let before = 0;
   for (const item of items) {
-    const idx = currentStageIndex(item);
+    const idx = clientStageIndex(item);
     if (idx === stageIndex) at++;
     else if (idx > stageIndex) past++;
     else before++;
@@ -120,9 +128,9 @@ function stageRailState(items: RoadmapItem[], stageIndex: number): StageRailStat
 const PHASE_ORDER: WorkflowStage["phase"][] = ["Business", "Development", "Delivery"];
 
 const PHASE_STAGE_COUNTS: Record<WorkflowStage["phase"], number> = {
-  Business: WORKFLOW_STAGES.filter((s) => s.phase === "Business").length,
-  Development: WORKFLOW_STAGES.filter((s) => s.phase === "Development").length,
-  Delivery: WORKFLOW_STAGES.filter((s) => s.phase === "Delivery").length,
+  Business: CLIENT_WORKFLOW_STAGES.filter((s) => s.phase === "Business").length,
+  Development: CLIENT_WORKFLOW_STAGES.filter((s) => s.phase === "Development").length,
+  Delivery: CLIENT_WORKFLOW_STAGES.filter((s) => s.phase === "Delivery").length,
 };
 
 export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
@@ -130,34 +138,34 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
 
   const grouped = useMemo(() => {
     const map = new Map<string, RoadmapItem[]>();
-    WORKFLOW_STAGES.forEach((s) => map.set(s.key, []));
+    CLIENT_WORKFLOW_STAGES.forEach((s) => map.set(s.key, []));
     items.forEach((i) => {
-      const stage = WORKFLOW_STAGES[currentStageIndex(i)];
-      if (stage) map.get(stage.key)!.push(i);
+      const stage = clientStageFor(i);
+      map.get(stage.key)!.push(i);
     });
     return map;
   }, [items]);
 
-  const activeStage = WORKFLOW_STAGES.find((s) => s.key === active) ?? null;
+  const activeStage = CLIENT_WORKFLOW_STAGES.find((s) => s.key === active) ?? null;
   const activeItems = active ? (grouped.get(active) ?? []) : [];
 
   const phaseSummary = useMemo(() => {
     const counts = { Business: 0, Development: 0, Delivery: 0 };
     items.forEach((i) => {
-      const stage = WORKFLOW_STAGES[currentStageIndex(i)];
+      const stage = clientStageFor(i);
       if (stage) counts[stage.phase]++;
     });
     return counts;
   }, [items]);
 
   const defaultFocusStage = useMemo(() => {
-    for (const s of WORKFLOW_STAGES) {
-      if (stageRailState(items, WORKFLOW_STAGES.indexOf(s)) === "current") return s.key;
+    for (const s of CLIENT_WORKFLOW_STAGES) {
+      if (stageRailState(items, CLIENT_WORKFLOW_STAGES.indexOf(s)) === "current") return s.key;
     }
-    for (let i = WORKFLOW_STAGES.length - 1; i >= 0; i--) {
-      if (stageRailState(items, i) === "completed") return WORKFLOW_STAGES[i]!.key;
+    for (let i = CLIENT_WORKFLOW_STAGES.length - 1; i >= 0; i--) {
+      if (stageRailState(items, i) === "completed") return CLIENT_WORKFLOW_STAGES[i]!.key;
     }
-    return WORKFLOW_STAGES[0]!.key;
+    return CLIENT_WORKFLOW_STAGES[0]!.key;
   }, [items]);
 
   return (
@@ -251,9 +259,9 @@ export function ClientWorkflowDiagram({ items }: { items: RoadmapItem[] }) {
           </div>
         ) : (
           <div className="mt-4 space-y-6">
-            {WORKFLOW_STAGES.filter((s) => (grouped.get(s.key) ?? []).length).map((s) => {
+            {CLIENT_WORKFLOW_STAGES.filter((s) => (grouped.get(s.key) ?? []).length).map((s) => {
               const tone = stageTone[s.key];
-              const idx = WORKFLOW_STAGES.indexOf(s);
+              const idx = CLIENT_WORKFLOW_STAGES.indexOf(s);
               const rail = stageRailState(items, idx);
               return (
                 <div key={s.key} className="scroll-mt-4">
@@ -332,7 +340,7 @@ function ConnectedWorkflowDiagram({
             ))}
           </div>
           <div className="flex items-center">
-            {WORKFLOW_STAGES.map((stage, stageIdx) => {
+            {CLIENT_WORKFLOW_STAGES.map((stage, stageIdx) => {
               const list = grouped.get(stage.key) ?? [];
               const isActive = active === stage.key;
               const tone = stageTone[stage.key];
@@ -448,7 +456,7 @@ function StageStatusIcon({
           "inline-flex shrink-0 items-center justify-center rounded-full bg-status-done/15 text-status-done ring-1 ring-status-done/30",
           size,
         )}
-        title="Completed"
+        title="Passed"
       >
         <Check className={compact ? "size-3.5" : "size-4"} aria-hidden />
       </span>
@@ -496,9 +504,9 @@ function FeatureCard({
   tone: (typeof stageTone)[string] | undefined;
   highlight?: boolean;
 }) {
-  const idx = currentStageIndex(item);
-  const pct = Math.round(((idx + 1) / WORKFLOW_STAGES.length) * 100);
-  const current = WORKFLOW_STAGES[idx]!;
+  const idx = clientStageIndex(item);
+  const pct = Math.round(((idx + 1) / CLIENT_WORKFLOW_STAGES.length) * 100);
+  const current = CLIENT_WORKFLOW_STAGES[idx]!;
   const eta = item.etaProduction ?? item.etaStaging;
 
   return (
@@ -555,9 +563,9 @@ function FeatureStepStrip({
     <div
       className="mt-3 flex items-center gap-0.5"
       role="img"
-      aria-label={`Workflow step ${currentIndex + 1} of ${WORKFLOW_STAGES.length}`}
+      aria-label={`Workflow step ${currentIndex + 1} of ${CLIENT_WORKFLOW_STAGES.length}`}
     >
-      {WORKFLOW_STAGES.map((s, i) => {
+      {CLIENT_WORKFLOW_STAGES.map((s, i) => {
         const done = i < currentIndex;
         const current = i === currentIndex;
         return (

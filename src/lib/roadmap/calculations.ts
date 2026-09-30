@@ -1,4 +1,4 @@
-import type { RoadmapFilterState, RoadmapItem } from "./types";
+import { displayDevStatus, type RoadmapFilterState, type RoadmapItem } from "./types";
 
 export const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -87,7 +87,7 @@ export function applyFilters(items: RoadmapItem[], f: RoadmapFilterState): Roadm
     }
     if (f.search.trim()) {
       const q = f.search.toLowerCase();
-      const hay = [i.id, i.module, i.feature, i.sprint, i.remarks, i.businessStatus, i.devStatus, i.deliveryStatus]
+      const hay = [i.id, i.module, i.feature, i.sprint, i.remarks, i.businessStatus, i.devStatus, displayDevStatus(i.devStatus), i.deliveryStatus]
         .join(" ")
         .toLowerCase();
       if (!hay.includes(q)) return false;
