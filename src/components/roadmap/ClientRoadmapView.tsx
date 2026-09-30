@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  ArrowDown,
+  ArrowUp,
   CalendarDays,
   CheckCircle2,
+  ChevronsUpDown,
   Clock,
   Layers,
   Rocket,
@@ -47,6 +50,53 @@ import { CLIENT_LOGO_PATH, clientHeroGradient, clientHeroTextClass } from "@/lib
 
 const deliveryEta = (i: RoadmapItem) => i.etaProduction ?? i.etaStaging;
 
+type ClientColKey =
+  | "id"
+  | "module"
+  | "feature"
+  | "priority"
+  | "sprint"
+  | "etaStaging"
+  | "etaProduction"
+  | "businessStatus"
+  | "deliveryStatus"
+  | "notes";
+
+const CLIENT_COLUMNS: { key: ClientColKey; label: string }[] = [
+  { key: "id", label: "ID" },
+  { key: "module", label: "Module" },
+  { key: "feature", label: "Feature" },
+  { key: "priority", label: "Priority" },
+  { key: "sprint", label: "Sprint" },
+  { key: "etaStaging", label: "ETA Staging" },
+  { key: "etaProduction", label: "ETA Production" },
+  { key: "businessStatus", label: "Business Status" },
+  { key: "deliveryStatus", label: "Delivery Status" },
+  { key: "notes", label: "Notes" },
+];
+
+const PRIORITY_RANK: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
+
+function clientSortValue(item: RoadmapItem, key: ClientColKey): string {
+  if (key === "notes") return clientRemark(item.remarks);
+  return String(item[key] ?? "");
+}
+
+function compareClientItems(a: RoadmapItem, b: RoadmapItem, key: ClientColKey, dir: "asc" | "desc") {
+  const mul = dir === "asc" ? 1 : -1;
+  if (key === "priority") {
+    const ra = PRIORITY_RANK[a.priority] ?? 99;
+    const rb = PRIORITY_RANK[b.priority] ?? 99;
+    return (ra - rb) * mul;
+  }
+  const va = clientSortValue(a, key);
+  const vb = clientSortValue(b, key);
+  if (!va && !vb) return 0;
+  if (!va) return 1;
+  if (!vb) return -1;
+  return va.localeCompare(vb, undefined, { numeric: true, sensitivity: "base" }) * mul;
+}
+
 const PALETTE_BASE = [
   "oklch(0.45 0.16 315)",
   "oklch(0.72 0.15 65)",
@@ -69,6 +119,7 @@ export function ClientRoadmapView({ clientName }: { clientName?: string } = {}) 
   const [module, setModule] = useState("all");
   const [sprint, setSprint] = useState("all");
   const [status, setStatus] = useState("all");
+  const [sort, setSort] = useState<{ key: ClientColKey; dir: "asc" | "desc" } | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -87,6 +138,11 @@ export function ClientRoadmapView({ clientName }: { clientName?: string } = {}) 
       }),
     [items, module, sprint, status, search],
   );
+
+  const sorted = useMemo(() => {
+    if (!sort) return filtered;
+    return [...filtered].sort((a, b) => compareClientItems(a, b, sort.key, sort.dir));
+  }, [filtered, sort]);
 
   const k = computeKpis(filtered);
   const today = todayISO();
@@ -297,17 +353,41 @@ export function ClientRoadmapView({ clientName }: { clientName?: string } = {}) 
                 <table className="w-full min-w-[1000px] text-sm">
                   <thead className="bg-surface text-xs uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      {["ID", "Module", "Feature", "Priority", "Sprint", "ETA Staging", "ETA Production", "Business Status", "Delivery Status", "Notes"].map(
-                        (h) => (
-                          <th key={h} className="whitespace-nowrap px-3 py-2.5 text-left font-semibold">
-                            {h}
+                      {CLIENT_COLUMNS.map((col) => {
+                        const activeDir = sort?.key === col.key ? sort.dir : null;
+                        return (
+                          <th
+                            key={col.key}
+                            className="group whitespace-nowrap px-3 py-2.5 text-left font-semibold"
+                            aria-sort={activeDir === "asc" ? "ascending" : activeDir === "desc" ? "descending" : "none"}
+                          >
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 hover:text-foreground"
+                              onClick={() =>
+                                setSort((current) =>
+                                  current?.key === col.key
+                                    ? { key: col.key, dir: current.dir === "asc" ? "desc" : "asc" }
+                                    : { key: col.key, dir: "asc" },
+                                )
+                              }
+                            >
+                              {col.label}
+                              {activeDir === "asc" ? (
+                                <ArrowUp className="h-3 w-3" />
+                              ) : activeDir === "desc" ? (
+                                <ArrowDown className="h-3 w-3" />
+                              ) : (
+                                <ChevronsUpDown className="h-3 w-3 opacity-40 group-hover:opacity-80" />
+                              )}
+                            </button>
                           </th>
-                        ),
-                      )}
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((i) => (
+                    {sorted.map((i) => (
                       <tr key={i.id} className="border-t transition-colors hover:bg-surface/60">
                         <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-muted-foreground">{i.id}</td>
                         <td className="whitespace-nowrap px-3 py-2.5">{i.module}</td>
