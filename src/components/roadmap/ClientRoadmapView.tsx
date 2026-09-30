@@ -1,5 +1,14 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, Clock, Layers, Rocket, Search, Timer } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Layers,
+  Rocket,
+  Timer,
+} from "lucide-react";
+import { toast } from "sonner";
 import {
   Bar,
   BarChart,
@@ -13,19 +22,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pill, StateBadge, deliveryTone, priorityTone, businessTone, stateTone } from "./StatusBadge";
 import { useRoadmap } from "@/lib/roadmap/store";
-import { MODULES, SPRINTS, type RoadmapItem } from "@/lib/roadmap/types";
+import type { RoadmapItem } from "@/lib/roadmap/types";
 import {
   computeKpis,
   derivedState,
@@ -38,13 +39,16 @@ import {
 } from "@/lib/roadmap/calculations";
 import { clientRemark } from "@/lib/roadmap/share";
 import { ClientWorkflowDiagram } from "./ClientWorkflowDiagram";
+import { useProgramTheme } from "@/components/theme/ProgramThemeProvider";
+import { ClientViewFilters } from "./ClientViewFilters";
 import { cn } from "@/lib/utils";
+import { ROADMAP_PRODUCT_NAME, clientRoadmapTitle } from "@/lib/brand";
+import { CLIENT_LOGO_PATH, clientHeroGradient, clientHeroTextClass } from "@/lib/brand/clientView";
 
 const deliveryEta = (i: RoadmapItem) => i.etaProduction ?? i.etaStaging;
 
-const PALETTE = [
-  "oklch(0.52 0.11 232)",
-  "oklch(0.6 0.12 155)",
+const PALETTE_BASE = [
+  "oklch(0.45 0.16 315)",
   "oklch(0.72 0.15 65)",
   "oklch(0.58 0.19 25)",
   "oklch(0.55 0.1 300)",
@@ -59,8 +63,8 @@ const barTone: Record<string, string> = {
   Planned: "bg-status-planned/12 border-status-planned/35",
 };
 
-export function ClientRoadmapView() {
-  const { items } = useRoadmap();
+export function ClientRoadmapView({ clientName }: { clientName?: string } = {}) {
+  const { items, loading, error, refresh, hydrated, modules, sprints } = useRoadmap();
   const [search, setSearch] = useState("");
   const [module, setModule] = useState("all");
   const [sprint, setSprint] = useState("all");
@@ -126,22 +130,87 @@ export function ClientRoadmapView() {
     { label: "Production Ready", value: k.productionReady, icon: Clock, tone: "text-foreground" },
   ];
 
-  const sprintsUsed = SPRINTS.map(String).filter((s) => filtered.some((i) => i.sprint === s));
+  const sprintsUsed = sprints.filter((s) => filtered.some((i) => i.sprint === s));
   const modulesUsed = Array.from(new Set(filtered.map((i) => i.module)));
-  const cols = sprintsUsed.length ? sprintsUsed : SPRINTS.map(String);
+  const cols = sprintsUsed.length ? sprintsUsed : sprints;
 
+  const moduleFilterOptions = useMemo(() => {
+    const inData = new Set(items.map((i) => i.module));
+    return modules.filter((m) => inData.has(m));
+  }, [items, modules]);
+
+  const sprintFilterOptions = useMemo(() => {
+    const inData = new Set(items.map((i) => i.sprint));
+    return sprints.filter((s) => inData.has(s));
+  }, [items, sprints]);
+
+  const resetClientFilters = () => {
+    setSearch("");
+    setModule("all");
+    setSprint("all");
+    setStatus("all");
+  };
+
+  const exportTitle = clientRoadmapTitle(clientName);
+
+  const exportExcel = async () => {
+    if (!filtered.length) {
+      toast.error("No items to export for the current filters.");
+      return;
+    }
+    try {
+      const { exportClientRoadmapExcel } = await import("@/lib/roadmap/exportClientExcel");
+      await exportClientRoadmapExcel({
+        title: exportTitle,
+        items: filtered,
+        clientName,
+        filters: { search, module, sprint, status },
+      });
+      toast.success("Excel file downloaded");
+    } catch {
+      toast.error("Could not export Excel file");
+    }
+  };
+
+  if (!hydrated || loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+        <p className="text-sm text-muted-foreground">Loading roadmap…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-xl font-semibold tracking-tight">Roadmap unavailable</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+          <Button variant="outline" className="mt-4" onClick={() => void refresh()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface">
       <header className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-brand-foreground">
-              <Rocket className="h-5 w-5" />
-            </div>
+            <img
+              src={CLIENT_LOGO_PATH}
+              alt="Dubai Culture — دبي للثقافة"
+              className="h-8 w-auto max-w-[120px] object-contain object-left"
+            />
             <div>
-              <h1 className="text-lg font-semibold leading-tight">DCAA Project Roadmap</h1>
-              <p className="text-xs text-muted-foreground">Client view · SAFe</p>
+              <h1 className="text-lg font-semibold leading-tight">
+                {ROADMAP_PRODUCT_NAME}
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {clientName ? `Client view · ${clientName}` : "Client view · SAFe"}
+              </p>
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -154,56 +223,23 @@ export function ClientRoadmapView() {
       <main className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
         {/* Project overview — gradient hero card */}
         <section
-          className="overflow-hidden rounded-2xl p-6 text-brand-foreground shadow-md"
-          style={{
-            backgroundImage:
-              "linear-gradient(120deg, var(--brand) 0%, color-mix(in oklab, var(--brand) 70%, black) 60%, color-mix(in oklab, var(--brand) 45%, black) 100%)",
-          }}
+          className={cn("overflow-hidden rounded-2xl p-6 shadow-md", clientHeroTextClass)}
+          style={{ backgroundImage: clientHeroGradient() }}
         >
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <div>
-              <Pill className="border-brand-foreground/30 bg-brand-foreground/15 text-brand-foreground">SAFe Program Train</Pill>
-              <h2 className="mt-3 text-xl font-semibold">Project Overview</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-foreground/80">
-                Delivery roadmap for the DCAA program, planned across {sprintsUsed.length || SPRINTS.length}{" "}
-                sprints and {modulesUsed.length} modules. This page shows scope, delivery dates for staging
-                and production, and current progress.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {modulesUsed.map((m) => (
-                  <Pill key={m} className="border-brand-foreground/25 bg-brand-foreground/10 text-brand-foreground">
-                    {m}
-                  </Pill>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-xl border border-brand-foreground/20 bg-brand-foreground/10 p-4 backdrop-blur-sm">
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm font-medium text-brand-foreground/90">Overall progress</span>
-                <span className="text-3xl font-semibold tabular-nums">{k.completionPct}%</span>
-              </div>
-              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-brand-foreground/20">
-                <div
-                  className="h-full rounded-full bg-brand-foreground transition-all"
-                  style={{ width: `${k.completionPct}%` }}
-                />
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-brand-foreground/75">
-                <div>
-                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">{k.completed}</div>
-                  Completed
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">{k.inProgress}</div>
-                  In progress
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-brand-foreground tabular-nums">
-                    {Math.max(0, k.total - k.completed - k.inProgress)}
-                  </div>
-                  Planned
-                </div>
-              </div>
+          <div>
+            <Pill className="border-white/30 bg-white/15 text-white">SAFe Program Train</Pill>
+            <h2 className="mt-3 text-xl font-semibold">Project Overview</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+              Delivery roadmap for the DTP program, planned across {sprintsUsed.length || sprints.length}{" "}
+              sprints and {modulesUsed.length} modules. This page shows scope, delivery dates for staging
+              and production, and current progress.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {modulesUsed.map((m) => (
+                <Pill key={m} className="border-white/25 bg-white/10 text-white">
+                  {m}
+                </Pill>
+              ))}
             </div>
           </div>
         </section>
@@ -222,39 +258,23 @@ export function ClientRoadmapView() {
           ))}
         </section>
 
-        {/* Search & filters */}
-        <section className="rounded-2xl border bg-card p-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[220px] flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                placeholder="Search features, modules, sprints…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <FilterSelect value={module} onChange={setModule} label="Module" options={MODULES.map(String)} />
-            <FilterSelect value={sprint} onChange={setSprint} label="Sprint" options={SPRINTS.map(String)} />
-            <FilterSelect
-              value={status}
-              onChange={setStatus}
-              label="Status"
-              options={["Planned", "In Progress", "Completed", "Delayed", "Blocked"]}
-            />
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setSearch("");
-                setModule("all");
-                setSprint("all");
-                setStatus("all");
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </section>
+        <ClientViewFilters
+          search={search}
+          onSearchChange={setSearch}
+          module={module}
+          onModuleChange={setModule}
+          sprint={sprint}
+          onSprintChange={setSprint}
+          status={status}
+          onStatusChange={setStatus}
+          moduleOptions={moduleFilterOptions}
+          sprintOptions={sprintFilterOptions}
+          filteredCount={filtered.length}
+          totalCount={items.length}
+          onReset={resetClientFilters}
+          onExport={() => void exportExcel()}
+          exportDisabled={!filtered.length}
+        />
 
         {/* Tabs */}
         <Tabs defaultValue="roadmap" className="space-y-4">
@@ -558,8 +578,14 @@ export function ClientRoadmapView() {
           </TabsContent>
         </Tabs>
 
-        <footer className="pb-8 text-center text-xs text-muted-foreground">
-          Shared read-only view · DCAA Project Roadmap
+        <footer className="space-y-1 pb-8 text-center text-xs text-muted-foreground">
+          <p>Shared read-only view · {ROADMAP_PRODUCT_NAME}</p>
+          <p>
+            Administrator?{" "}
+            <Link to="/login" className="underline underline-offset-2">
+              Admin sign in
+            </Link>
+          </p>
         </footer>
       </main>
     </div>
@@ -567,6 +593,11 @@ export function ClientRoadmapView() {
 }
 
 function InsightsPanel({ items }: { items: RoadmapItem[] }) {
+  const { statusDoneColor } = useProgramTheme();
+  const palette = useMemo(
+    () => [PALETTE_BASE[0]!, statusDoneColor, ...PALETTE_BASE.slice(1)],
+    [statusDoneColor],
+  );
   const k = computeKpis(items);
   const byModule = groupCount(items, (i) => i.module);
   const byBusiness = groupCount(items, (i) => i.businessStatus || "Unset");
@@ -597,11 +628,11 @@ function InsightsPanel({ items }: { items: RoadmapItem[] }) {
       </Panel>
 
       <Panel title="Items by Module">
-        <Donut data={byModule} />
+        <Donut data={byModule} palette={palette} />
       </Panel>
 
       <Panel title="Delivery Status">
-        <Donut data={byDelivery} />
+        <Donut data={byDelivery} palette={palette} />
       </Panel>
 
       <Panel title="Business Status" subtitle="Distribution across the intake pipeline">
@@ -611,7 +642,7 @@ function InsightsPanel({ items }: { items: RoadmapItem[] }) {
             <XAxis type="number" allowDecimals={false} fontSize={11} />
             <YAxis type="category" dataKey="name" width={110} fontSize={11} />
             <Tooltip />
-            <Bar dataKey="value" fill={PALETTE[0]} radius={[0, 4, 4, 0]} />
+            <Bar dataKey="value" fill={palette[0]} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -625,7 +656,7 @@ function InsightsPanel({ items }: { items: RoadmapItem[] }) {
             <Tooltip />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {byPriority.map((d, idx) => (
-                <Cell key={d.name} fill={PALETTE[idx % PALETTE.length]} />
+                <Cell key={d.name} fill={palette[idx % palette.length]} />
               ))}
             </Bar>
           </BarChart>
@@ -639,7 +670,7 @@ function InsightsPanel({ items }: { items: RoadmapItem[] }) {
             <XAxis dataKey="name" fontSize={11} />
             <YAxis allowDecimals={false} fontSize={11} />
             <Tooltip />
-            <Bar dataKey="value" fill={PALETTE[1]} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill={palette[1]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -651,7 +682,7 @@ function InsightsPanel({ items }: { items: RoadmapItem[] }) {
             <XAxis dataKey="name" fontSize={11} />
             <YAxis allowDecimals={false} fontSize={11} />
             <Tooltip />
-            <Bar dataKey="value" fill={PALETTE[2]} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill={palette[2]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -681,13 +712,13 @@ function Panel({ title, subtitle, children }: { title: string; subtitle?: string
   );
 }
 
-function Donut({ data }: { data: { name: string; value: number }[] }) {
+function Donut({ data, palette }: { data: { name: string; value: number }[]; palette: string[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <PieChart>
         <Pie data={data} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
           {data.map((d, i) => (
-            <Cell key={d.name} fill={PALETTE[i % PALETTE.length]} />
+            <Cell key={d.name} fill={palette[i % palette.length]} />
           ))}
         </Pie>
         <Tooltip />
@@ -703,34 +734,6 @@ function Field({ label, value, strong }: { label: string; value: string; strong?
       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className={cn("mt-1.5 text-sm", strong && "font-semibold")}>{value}</div>
     </div>
-  );
-}
-
-function FilterSelect({
-  value,
-  onChange,
-  label,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  label: string;
-  options: string[];
-}) {
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-[170px]">
-        <SelectValue placeholder={label} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All {label}s</SelectItem>
-        {options.map((o) => (
-          <SelectItem key={o} value={o}>
-            {o}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }
 

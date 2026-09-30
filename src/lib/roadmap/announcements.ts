@@ -65,7 +65,7 @@ export function buildAnnouncements(
 export const uatDateFor = (sprintName: string) => sprintByName(sprintName)?.uat ?? null;
 
 export function announcementSubject(a: SprintAnnouncement) {
-  return `DCAA Project Update — ${a.sprint.name} Delivery Announcement`;
+  return `DTP Project Update — ${a.sprint.name} Delivery Announcement`;
 }
 
 export function announcementEmail(a: SprintAnnouncement) {
@@ -98,7 +98,7 @@ export function announcementEmail(a: SprintAnnouncement) {
   lines.push(`All listed features are available for UAT starting ${formatDate(a.sprint.uat)}.`);
   lines.push("");
   lines.push("Best regards,");
-  lines.push("DCAA Delivery Team");
+  lines.push("DTP Delivery Team");
   return lines.join("\n");
 }
 
@@ -109,8 +109,8 @@ export function announcementEmail(a: SprintAnnouncement) {
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const BRAND = "#0e7c86";
-const BRAND_DARK = "#0a5c64";
+const BRAND = "#763291";
+const BRAND_DARK = "#4A205A";
 const INK = "#1f2937";
 const MUTED = "#6b7280";
 const LINE = "#e5e7eb";
@@ -182,11 +182,11 @@ export function announcementEmailHtml(a: SprintAnnouncement) {
       <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:640px;max-width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid ${LINE};">
         <tr>
           <td style="background:${BRAND};background-image:linear-gradient(135deg,${BRAND} 0%,${BRAND_DARK} 100%);padding:26px 28px;">
-            <div style="font:700 12px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#bfe9ee;">DCAA Project Roadmap</div>
+            <div style="font:700 12px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#f3e4f8;">DTP— Roadmap</div>
             <div style="font:700 24px/1.35 Arial,Helvetica,sans-serif;color:#ffffff;margin-top:6px;">${esc(
               a.sprint.name,
             )} Delivery Announcement</div>
-            <div style="font:400 13px/1.5 Arial,Helvetica,sans-serif;color:#d8f1f4;margin-top:6px;">${esc(
+            <div style="font:400 13px/1.5 Arial,Helvetica,sans-serif;color:#ead6f2;margin-top:6px;">${esc(
               formatDate(a.sprint.start),
             )} &ndash; ${esc(formatDate(a.sprint.end))}</div>
           </td>
@@ -225,10 +225,10 @@ export function announcementEmailHtml(a: SprintAnnouncement) {
         </td></tr>
         <tr><td style="border-top:1px solid ${LINE};padding:18px 22px;background:${SOFT};">
           <div style="font:600 13px/1.6 Arial,Helvetica,sans-serif;color:${INK};">Best regards,</div>
-          <div style="font:400 13px/1.6 Arial,Helvetica,sans-serif;color:${MUTED};">DCAA Delivery Team</div>
+          <div style="font:400 13px/1.6 Arial,Helvetica,sans-serif;color:${MUTED};">DTP Delivery Team</div>
         </td></tr>
       </table>
-      <div style="font:400 11px/1.6 Arial,Helvetica,sans-serif;color:${MUTED};padding:14px 0 0 0;">This is an automated project update from the DCAA Project Roadmap.</div>
+      <div style="font:400 11px/1.6 Arial,Helvetica,sans-serif;color:${MUTED};padding:14px 0 0 0;">This is an automated project update from the DTP— Roadmap.</div>
     </td></tr>
   </table>
 </body></html>`;

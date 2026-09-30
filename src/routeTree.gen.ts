@@ -12,9 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as ConsultationsRouteImport } from './routes/consultations'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ReleaseNotesRouteImport } from './routes/release-notes'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RoadmapClientSlugRouteImport } from './routes/Roadmap.$clientSlug'
+import { Route as ConsultationClientSlugRouteImport } from './routes/consultation.$clientSlug'
 import { Route as ShareTokenRouteImport } from './routes/share.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -32,6 +36,16 @@ const AnnouncementsRoute = AnnouncementsRouteImport.update({
   path: '/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsultationsRoute = ConsultationsRouteImport.update({
+  id: '/consultations',
+  path: '/consultations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReleaseNotesRoute = ReleaseNotesRouteImport.update({
   id: '/release-notes',
   path: '/release-notes',
@@ -47,6 +61,16 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RoadmapClientSlugRoute = RoadmapClientSlugRouteImport.update({
+  id: '/Roadmap/$clientSlug',
+  path: '/Roadmap/$clientSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultationClientSlugRoute = ConsultationClientSlugRouteImport.update({
+  id: '/consultation/$clientSlug',
+  path: '/consultation/$clientSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShareTokenRoute = ShareTokenRouteImport.update({
   id: '/share/$token',
   path: '/share/$token',
@@ -57,18 +81,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/announcements': typeof AnnouncementsRoute
+  '/consultations': typeof ConsultationsRoute
+  '/login': typeof LoginRoute
   '/release-notes': typeof ReleaseNotesRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/Roadmap/$clientSlug': typeof RoadmapClientSlugRoute
+  '/consultation/$clientSlug': typeof ConsultationClientSlugRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/announcements': typeof AnnouncementsRoute
+  '/consultations': typeof ConsultationsRoute
+  '/login': typeof LoginRoute
   '/release-notes': typeof ReleaseNotesRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/Roadmap/$clientSlug': typeof RoadmapClientSlugRoute
+  '/consultation/$clientSlug': typeof ConsultationClientSlugRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRoutesById {
@@ -76,9 +108,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/announcements': typeof AnnouncementsRoute
+  '/consultations': typeof ConsultationsRoute
+  '/login': typeof LoginRoute
   '/release-notes': typeof ReleaseNotesRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/Roadmap/$clientSlug': typeof RoadmapClientSlugRoute
+  '/consultation/$clientSlug': typeof ConsultationClientSlugRoute
   '/share/$token': typeof ShareTokenRoute
 }
 export interface FileRouteTypes {
@@ -87,27 +123,39 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/announcements'
+    | '/consultations'
+    | '/login'
     | '/release-notes'
     | '/reports'
     | '/settings'
+    | '/Roadmap/$clientSlug'
+    | '/consultation/$clientSlug'
     | '/share/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analytics'
     | '/announcements'
+    | '/consultations'
+    | '/login'
     | '/release-notes'
     | '/reports'
     | '/settings'
+    | '/Roadmap/$clientSlug'
+    | '/consultation/$clientSlug'
     | '/share/$token'
   id:
     | '__root__'
     | '/'
     | '/analytics'
     | '/announcements'
+    | '/consultations'
+    | '/login'
     | '/release-notes'
     | '/reports'
     | '/settings'
+    | '/Roadmap/$clientSlug'
+    | '/consultation/$clientSlug'
     | '/share/$token'
   fileRoutesById: FileRoutesById
 }
@@ -115,9 +163,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
+  ConsultationsRoute: typeof ConsultationsRoute
+  LoginRoute: typeof LoginRoute
   ReleaseNotesRoute: typeof ReleaseNotesRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
+  RoadmapClientSlugRoute: typeof RoadmapClientSlugRoute
+  ConsultationClientSlugRoute: typeof ConsultationClientSlugRoute
   ShareTokenRoute: typeof ShareTokenRoute
 }
 
@@ -144,6 +196,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/consultations': {
+      id: '/consultations'
+      path: '/consultations'
+      fullPath: '/consultations'
+      preLoaderRoute: typeof ConsultationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/release-notes': {
       id: '/release-notes'
       path: '/release-notes'
@@ -165,6 +231,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Roadmap/$clientSlug': {
+      id: '/Roadmap/$clientSlug'
+      path: '/Roadmap/$clientSlug'
+      fullPath: '/Roadmap/$clientSlug'
+      preLoaderRoute: typeof RoadmapClientSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consultation/$clientSlug': {
+      id: '/consultation/$clientSlug'
+      path: '/consultation/$clientSlug'
+      fullPath: '/consultation/$clientSlug'
+      preLoaderRoute: typeof ConsultationClientSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/share/$token': {
       id: '/share/$token'
       path: '/share/$token'
@@ -179,9 +259,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   AnnouncementsRoute: AnnouncementsRoute,
+  ConsultationsRoute: ConsultationsRoute,
+  LoginRoute: LoginRoute,
   ReleaseNotesRoute: ReleaseNotesRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
+  RoadmapClientSlugRoute: RoadmapClientSlugRoute,
+  ConsultationClientSlugRoute: ConsultationClientSlugRoute,
   ShareTokenRoute: ShareTokenRoute,
 }
 export const routeTree = rootRouteImport

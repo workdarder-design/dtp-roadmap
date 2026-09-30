@@ -21,9 +21,7 @@ import {
   BUSINESS_STATUSES,
   DELIVERY_STATUSES,
   DEV_STATUSES,
-  MODULES,
   PRIORITIES,
-  SPRINTS,
   type RoadmapItem,
 } from "@/lib/roadmap/types";
 
@@ -38,7 +36,7 @@ export function RoadmapItemModal({
   onOpenChange: (open: boolean) => void;
   item?: RoadmapItem | undefined;
 }) {
-  const { addItem, updateItem, nextId, isAdmin } = useRoadmap();
+  const { addItem, updateItem, nextId, isAdmin, modules, sprints } = useRoadmap();
   const editing = !!item;
 
   const form = useForm<RoadmapItemInput>({
@@ -60,21 +58,25 @@ export function RoadmapItemModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item]);
 
-  const submit = (values: RoadmapItemInput) => {
+  const submit = async (values: RoadmapItemInput) => {
     const payload: RoadmapItem = {
       ...values,
       etaStaging: values.etaStaging || null,
       etaProduction: values.etaProduction || null,
       framework: "SAFe",
     };
-    if (editing && item) {
-      updateItem(item.id, payload);
-      toast.success(`${item.id} updated`);
-    } else {
-      addItem(payload);
-      toast.success(`${payload.id} added to the roadmap`);
+    try {
+      if (editing && item) {
+        await updateItem(item.id, payload);
+        toast.success(`${item.id} updated`);
+      } else {
+        await addItem(payload);
+        toast.success(`${payload.id} added to the roadmap`);
+      }
+      onOpenChange(false);
+    } catch {
+      /* toast handled in store */
     }
-    onOpenChange(false);
   };
 
   const sel = (name: keyof RoadmapItemInput, label: string, options: readonly string[]) => (
@@ -110,7 +112,7 @@ export function RoadmapItemModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(submit)} className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={form.handleSubmit((v) => void submit(v))} className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>ID</Label>
             <Input
@@ -125,7 +127,7 @@ export function RoadmapItemModal({
             </p>
             <FieldError msg={form.formState.errors.id?.message} />
           </div>
-          {sel("module", "Module", MODULES)}
+          {sel("module", "Module", modules)}
           <div className="space-y-1.5 sm:col-span-2">
             <Label>
               Feature <Req />
@@ -134,7 +136,7 @@ export function RoadmapItemModal({
             <FieldError msg={form.formState.errors.feature?.message} />
           </div>
           {sel("priority", "Priority", PRIORITIES)}
-          {sel("sprint", "Sprint", SPRINTS)}
+          {sel("sprint", "Sprint", sprints)}
           <div className="space-y-1.5">
             <Label>ETA on Staging</Label>
             <Input type="date" {...form.register("etaStaging")} />

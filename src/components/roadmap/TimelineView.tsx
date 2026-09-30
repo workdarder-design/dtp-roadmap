@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRoadmap } from "@/lib/roadmap/store";
-import { SPRINTS, type RoadmapItem } from "@/lib/roadmap/types";
+import type { RoadmapItem } from "@/lib/roadmap/types";
 import { derivedState, formatDate } from "@/lib/roadmap/calculations";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,10 @@ const barColor: Record<string, string> = {
 };
 
 export function TimelineView() {
-  const { filtered, updateItem, isAdmin } = useRoadmap();
+  const { filtered, updateItem, isAdmin, sprints: programSprints } = useRoadmap();
   const [open, setOpen] = useState<string | null>(null);
 
-  const sprints = useMemo(() => SPRINTS.map(String), []);
+  const sprints = useMemo(() => programSprints, [programSprints]);
   const startIdx = (i: RoadmapItem) => Math.max(0, sprints.indexOf(i.sprint));
   const span = (i: RoadmapItem) => (i.etaProduction ? 2 : 1);
 

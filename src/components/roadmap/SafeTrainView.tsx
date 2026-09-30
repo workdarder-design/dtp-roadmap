@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRoadmap } from "@/lib/roadmap/store";
-import { SPRINTS, type RoadmapItem } from "@/lib/roadmap/types";
+import type { RoadmapItem } from "@/lib/roadmap/types";
 import { derivedState, formatDate } from "@/lib/roadmap/calculations";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,15 @@ const barTone: Record<string, string> = {
 };
 
 export function SafeTrainView() {
-  const { filtered } = useRoadmap();
+  const { filtered, sprints: programSprints } = useRoadmap();
   const [zoom, setZoom] = useState<Zoom>("sprint");
   const [editing, setEditing] = useState<RoadmapItem | null>(null);
 
   const sprints = useMemo(() => {
     const used = new Set(filtered.map((i) => i.sprint));
-    const list = SPRINTS.map(String).filter((s) => used.has(s));
-    return list.length ? list : SPRINTS.map(String).slice(0, 5);
-  }, [filtered]);
+    const list = programSprints.filter((s) => used.has(s));
+    return list.length ? list : programSprints.slice(0, 5);
+  }, [filtered, programSprints]);
 
   const columns = zoom === "sprint" ? sprints : chunk(sprints, 2).map((c) => c.join(" · "));
   const colIndex = (sprint: string) => {

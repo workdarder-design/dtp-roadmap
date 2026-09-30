@@ -17,12 +17,12 @@ import {
 export const Route = createFileRoute("/release-notes")({
   head: () => ({
     meta: [
-      { title: "Release Notes — DCAA Project Roadmap" },
+      { title: "Release Notes — DTP— Roadmap" },
       {
         name: "description",
-        content: "Automatically generated release notes for every completed DCAA sprint, grouped by module and feature.",
+        content: "Automatically generated release notes for every completed DTP sprint, grouped by module and feature.",
       },
-      { property: "og:title", content: "Release Notes — DCAA Project Roadmap" },
+      { property: "og:title", content: "Release Notes — DTP— Roadmap" },
       { property: "og:description", content: "Sprint-by-sprint delivery history with UAT dates and delivered features." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -77,7 +77,7 @@ function Body() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-gradient-to-r from-primary/90 to-teal-500/80 p-5 text-primary-foreground shadow-sm">
+      <div className="rounded-2xl bg-gradient-to-r from-brand to-[color-mix(in_oklab,var(--brand)_72%,black)] p-5 text-brand-foreground shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="flex items-center gap-2 text-lg font-semibold">

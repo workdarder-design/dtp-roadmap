@@ -18,7 +18,6 @@ import {
   DELIVERY_STATUSES,
   DEV_STATUSES,
   PRIORITIES,
-  SPRINTS,
   type RoadmapFilterState,
   type ScopeType,
 } from "@/lib/roadmap/types";
@@ -76,7 +75,7 @@ interface Chip {
 }
 
 export function RoadmapFilters() {
-  const { filters, setFilters, resetFilters, items } = useRoadmap();
+  const { filters, setFilters, resetFilters, items, sprints } = useRoadmap();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<RoadmapFilterState>(filters);
 
@@ -238,7 +237,7 @@ export function RoadmapFilters() {
                   value={draft.sprint}
                   onChange={(v) => patch({ sprint: v })}
                   allLabel="All Sprints"
-                  options={SPRINTS}
+                  options={sprints}
                 />
               </Field>
             </div>

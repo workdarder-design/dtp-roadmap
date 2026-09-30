@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -12,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { useRoadmap } from "@/lib/roadmap/store";
+import { useProgramTheme } from "@/components/theme/ProgramThemeProvider";
 import {
   computeKpis,
   derivedState,
@@ -24,9 +26,8 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Pill, priorityTone, stateTone } from "./StatusBadge";
 
-const PALETTE = [
-  "oklch(0.52 0.11 232)",
-  "oklch(0.6 0.12 155)",
+const PALETTE_BASE = [
+  "oklch(0.45 0.16 315)",
   "oklch(0.72 0.15 65)",
   "oklch(0.58 0.19 25)",
   "oklch(0.55 0.1 300)",
@@ -47,6 +48,11 @@ function Panel({ title, subtitle, children }: { title: string; subtitle?: string
 
 export function AnalyticsView() {
   const { filtered } = useRoadmap();
+  const { statusDoneColor } = useProgramTheme();
+  const palette = useMemo(
+    () => [PALETTE_BASE[0]!, statusDoneColor, ...PALETTE_BASE.slice(1)],
+    [statusDoneColor],
+  );
   const kpi = computeKpis(filtered);
 
   const byModule = groupCount(filtered, (i) => i.module);
@@ -85,11 +91,11 @@ export function AnalyticsView() {
       </Panel>
 
       <Panel title="Items by Module">
-        <Donut data={byModule} />
+        <Donut data={byModule} palette={palette} />
       </Panel>
 
       <Panel title="Development Status">
-        <Donut data={byDev} />
+        <Donut data={byDev} palette={palette} />
       </Panel>
 
       <Panel title="Business Status" subtitle="Distribution across the intake pipeline">
@@ -99,7 +105,7 @@ export function AnalyticsView() {
             <XAxis type="number" allowDecimals={false} fontSize={11} />
             <YAxis type="category" dataKey="name" width={110} fontSize={11} />
             <Tooltip />
-            <Bar dataKey="value" fill={PALETTE[0]} radius={[0, 4, 4, 0]} />
+            <Bar dataKey="value" fill={palette[0]} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -113,7 +119,7 @@ export function AnalyticsView() {
             <Tooltip />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {byPriority.map((d, idx) => (
-                <Cell key={d.name} fill={PALETTE[idx % PALETTE.length]} />
+                <Cell key={d.name} fill={palette[idx % palette.length]} />
               ))}
             </Bar>
           </BarChart>
@@ -121,7 +127,7 @@ export function AnalyticsView() {
       </Panel>
 
       <Panel title="Delivery Status">
-        <Donut data={byDelivery} />
+        <Donut data={byDelivery} palette={palette} />
       </Panel>
 
       <Panel title="Sprint Distribution">
@@ -131,7 +137,7 @@ export function AnalyticsView() {
             <XAxis dataKey="name" fontSize={11} />
             <YAxis allowDecimals={false} fontSize={11} />
             <Tooltip />
-            <Bar dataKey="value" fill={PALETTE[1]} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill={palette[1]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -173,7 +179,7 @@ export function AnalyticsView() {
             <XAxis dataKey="name" fontSize={11} />
             <YAxis allowDecimals={false} fontSize={11} />
             <Tooltip />
-            <Bar dataKey="value" fill={PALETTE[2]} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill={palette[2]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -200,13 +206,13 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Donut({ data }: { data: { name: string; value: number }[] }) {
+function Donut({ data, palette }: { data: { name: string; value: number }[]; palette: string[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <PieChart>
         <Pie data={data} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
           {data.map((d, i) => (
-            <Cell key={d.name} fill={PALETTE[i % PALETTE.length]} />
+            <Cell key={d.name} fill={palette[i % palette.length]} />
           ))}
         </Pie>
         <Tooltip />

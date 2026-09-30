@@ -25,9 +25,7 @@ import {
   BUSINESS_STATUSES,
   DELIVERY_STATUSES,
   DEV_STATUSES,
-  MODULES,
   PRIORITIES,
-  SPRINTS,
   type RoadmapItem,
 } from "@/lib/roadmap/types";
 import { formatDate } from "@/lib/roadmap/calculations";
@@ -54,7 +52,7 @@ const COLUMNS: { key: ColKey; label: string; width: number }[] = [
 ];
 
 export function RoadmapTable() {
-  const { filtered, updateItem, deleteItems, isAdmin } = useRoadmap();
+  const { filtered, updateItem, deleteItems, isAdmin, modules, sprints } = useRoadmap();
   const [sort, setSort] = useState<{ key: ColKey; dir: "asc" | "desc" }>({ key: "id", dir: "asc" });
   const [visible, setVisible] = useState<ColKey[]>(COLUMNS.map((c) => c.key));
   const [widths, setWidths] = useState<Record<string, number>>(
@@ -131,7 +129,7 @@ export function RoadmapTable() {
           <InlineSelect
             editable={isAdmin}
             value={item.module}
-            options={MODULES}
+            options={modules}
             onChange={(v) => set(item, { module: v })}
             render={(v) => <span className="truncate text-sm font-medium">{v}</span>}
           />
@@ -155,7 +153,7 @@ export function RoadmapTable() {
           <InlineSelect
             editable={isAdmin}
             value={item.sprint}
-            options={SPRINTS}
+            options={sprints}
             onChange={(v) => set(item, { sprint: v })}
             render={(v) => <span className="text-sm">{v}</span>}
           />

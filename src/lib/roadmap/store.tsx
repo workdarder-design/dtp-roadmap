@@ -1,11 +1,35 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { SEED_ITEMS } from "./seed";
-import { DEFAULT_FILTERS, normalizeModule, type RoadmapFilterState, type RoadmapItem } from "./types";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { toast } from "sonner";
+import {
+  DEFAULT_FILTERS,
+  DEFAULT_MODULES,
+  DEFAULT_SPRINTS,
+  normalizeModule,
+  type RoadmapFilterState,
+  type RoadmapItem,
+} from "./types";
+import { fetchProgramModules, fetchProgramSprints } from "@/lib/services/programConfig";
 import { applyFilters } from "./calculations";
+import { useAuth } from "@/lib/auth/store";
+import {
+  deleteRoadmapItems,
+  fetchRoadmapItems,
+  insertRoadmapItem,
+  nextRoadmapItemId,
+  updateRoadmapItem,
+} from "@/lib/services/roadmapItems";
+import { updateProfileRole } from "@/lib/services/profiles";
+import type { UserRole } from "@/lib/supabase/database.types";
 
-const STORAGE_KEY = "dcaa-roadmap-v1";
-
-export type Role = "admin" | "viewer";
+export type Role = UserRole;
 
 interface RoadmapContextValue {
   items: RoadmapItem[];
@@ -14,17 +38,21 @@ interface RoadmapContextValue {
   setFilters: (patch: Partial<RoadmapFilterState>) => void;
   resetFilters: () => void;
   hydrated: boolean;
+  loading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
   role: Role;
   setRole: (r: Role) => void;
   isAdmin: boolean;
-  addItem: (item: RoadmapItem) => void;
-  updateItem: (id: string, patch: Partial<RoadmapItem>) => void;
-  deleteItems: (ids: string[]) => void;
+  addItem: (item: RoadmapItem) => Promise<void>;
+  updateItem: (id: string, patch: Partial<RoadmapItem>) => Promise<void>;
+  deleteItems: (ids: string[]) => Promise<void>;
   nextId: () => string;
+  modules: string[];
+  sprints: string[];
+  refreshProgramConfig: () => Promise<void>;
 }
 
-// Keep a single context instance even if this module is evaluated twice
-// (dev HMR / route code-splitting can create duplicate module instances).
 const globalStore = globalThis as typeof globalThis & {
   __dcaaRoadmapContext?: React.Context<RoadmapContextValue | null>;
 };
@@ -33,35 +61,95 @@ const RoadmapContext =
   (globalStore.__dcaaRoadmapContext = createContext<RoadmapContextValue | null>(null));
 
 export function RoadmapProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<RoadmapItem[]>(SEED_ITEMS);
+  const { profile, user, refreshProfile } = useAuth();
+  const [items, setItems] = useState<RoadmapItem[]>([]);
   const [filters, setFiltersState] = useState<RoadmapFilterState>(DEFAULT_FILTERS);
-  const [role, setRole] = useState<Role>("admin");
+  const [role, setRoleState] = useState<Role>("admin");
   const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [idCounter, setIdCounter] = useState("DCAA-001");
+  const [modules, setModules] = useState<string[]>([...DEFAULT_MODULES]);
+  const [sprints, setSprints] = useState<string[]>([...DEFAULT_SPRINTS]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw)
-        setItems(
-          (JSON.parse(raw) as RoadmapItem[]).map((i) => ({ ...i, module: normalizeModule(i.module) })),
-        );
-    } catch {
-      /* ignore */
+    if (profile?.role) {
+      setRoleState(profile.role);
+    } else if (!user) {
+      setRoleState("admin");
     }
-    setHydrated(true);
+  }, [profile?.role, user]);
+
+  const refreshProgramConfig = useCallback(async () => {
+    try {
+      const [m, s] = await Promise.all([fetchProgramModules(), fetchProgramSprints()]);
+      setModules(m);
+      setSprints(s);
+    } catch {
+      setModules([...DEFAULT_MODULES]);
+      setSprints([...DEFAULT_SPRINTS]);
+    }
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const list = await fetchRoadmapItems();
+      setItems(list.map((i) => ({ ...i, module: normalizeModule(i.module) })));
+      const next = await nextRoadmapItemId(list);
+      setIdCounter(next);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load roadmap";
+      setError(message);
+      setItems([]);
+    } finally {
+      setLoading(false);
+      setHydrated(true);
+    }
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      /* ignore */
-    }
-  }, [items, hydrated]);
+    void refresh();
+    void refreshProgramConfig();
+  }, [refresh, refreshProgramConfig]);
 
   const setFilters = useCallback((patch: Partial<RoadmapFilterState>) => {
     setFiltersState((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const setRole = useCallback(
+    (r: Role) => {
+      setRoleState(r);
+      if (!user?.id) return;
+      void updateProfileRole(user.id, r)
+        .then(() => refreshProfile())
+        .catch((err) => {
+          toast.error(err instanceof Error ? err.message : "Could not update role");
+        });
+    },
+    [user?.id, refreshProfile],
+  );
+
+  const addItem = useCallback(async (item: RoadmapItem) => {
+    const created = await insertRoadmapItem(item);
+    setItems((prev) => [...prev, { ...created, module: normalizeModule(created.module) }]);
+    const next = await nextRoadmapItemId([...items, created]);
+    setIdCounter(next);
+  }, [items]);
+
+  const updateItem = useCallback(async (id: string, patch: Partial<RoadmapItem>) => {
+    const updated = await updateRoadmapItem(id, patch);
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === id ? { ...updated, module: normalizeModule(updated.module) } : i,
+      ),
+    );
+  }, []);
+
+  const deleteItemsHandler = useCallback(async (ids: string[]) => {
+    await deleteRoadmapItems(ids);
+    setItems((prev) => prev.filter((i) => !ids.includes(i.id)));
   }, []);
 
   const value = useMemo<RoadmapContextValue>(() => {
@@ -72,22 +160,59 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
       setFilters,
       resetFilters: () => setFiltersState(DEFAULT_FILTERS),
       hydrated,
+      loading,
+      error,
+      refresh,
       role,
       setRole,
       isAdmin: role === "admin",
-      addItem: (item) => setItems((prev) => [...prev, item]),
-      updateItem: (id, patch) =>
-        setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i))),
-      deleteItems: (ids) => setItems((prev) => prev.filter((i) => !ids.includes(i.id))),
-      nextId: () => {
-        const max = items.reduce((acc, i) => {
-          const n = Number(i.id.split("-")[1]);
-          return Number.isFinite(n) ? Math.max(acc, n) : acc;
-        }, 0);
-        return `DCAA-${String(max + 1).padStart(3, "0")}`;
+      addItem: async (item) => {
+        try {
+          await addItem(item);
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Could not add item");
+          throw err;
+        }
       },
+      updateItem: async (id, patch) => {
+        try {
+          await updateItem(id, patch);
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Could not save changes");
+          throw err;
+        }
+      },
+      deleteItems: async (ids) => {
+        try {
+          await deleteItemsHandler(ids);
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Could not delete items");
+          throw err;
+        }
+      },
+      nextId: () => idCounter,
+      modules,
+      sprints,
+      refreshProgramConfig,
     };
-  }, [items, filters, setFilters, hydrated, role]);
+  }, [
+    items,
+    filters,
+    setFilters,
+    hydrated,
+    loading,
+    error,
+    refresh,
+    role,
+    setRole,
+    addItem,
+    updateItem,
+    deleteItemsHandler,
+    idCounter,
+    modules,
+    sprints,
+    refreshProgramConfig,
+  ]);
 
   return <RoadmapContext.Provider value={value}>{children}</RoadmapContext.Provider>;
 }

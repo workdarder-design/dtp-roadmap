@@ -31,12 +31,12 @@ export const DELIVERY_STATUSES = [
 ] as const;
 export type DeliveryStatus = (typeof DELIVERY_STATUSES)[number];
 
-export const SPRINTS = SPRINT_NAMES;
+export const DEFAULT_SPRINTS = SPRINT_NAMES;
+/** @deprecated Use `useRoadmap().sprints` — loaded from Supabase program config. */
+export const SPRINTS = DEFAULT_SPRINTS;
 export type Sprint = string;
 
-
-
-export const MODULES = [
+export const DEFAULT_MODULES = [
   "Dashboards",
   "Performance",
   "Services",
@@ -48,6 +48,9 @@ export const MODULES = [
   "Innovation",
   "Audit",
 ] as const;
+
+/** @deprecated Use `useRoadmap().modules` — loaded from Supabase program config. */
+export const MODULES = DEFAULT_MODULES;
 
 /** Older saved data used legacy module names — normalize them to the current list. */
 export const LEGACY_MODULE_MAP: Record<string, string> = {

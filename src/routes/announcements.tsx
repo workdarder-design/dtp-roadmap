@@ -34,13 +34,13 @@ import { formatDate } from "@/lib/roadmap/calculations";
 export const Route = createFileRoute("/announcements")({
   head: () => ({
     meta: [
-      { title: "Announcements — DCAA Project Roadmap" },
+      { title: "Announcements — DTP— Roadmap" },
       {
         name: "description",
         content:
           "Auto-generated sprint delivery announcements for completed and production features, ready to review, publish and email.",
       },
-      { property: "og:title", content: "Announcements — DCAA Project Roadmap" },
+      { property: "og:title", content: "Announcements — DTP— Roadmap" },
       {
         property: "og:description",
         content: "Review, publish and email sprint delivery announcements with UAT dates.",

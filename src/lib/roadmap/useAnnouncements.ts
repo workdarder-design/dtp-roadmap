@@ -1,4 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth/store";
+import {
+  fetchAnnouncementStatuses,
+  upsertAnnouncementStatus,
+  type AnnouncementStatusMap,
+} from "@/lib/services/announcementStatuses";
 import { useRoadmap } from "./store";
 import {
   buildAnnouncements,
@@ -6,37 +13,43 @@ import {
   type SprintAnnouncement,
 } from "./announcements";
 
-const STORAGE_KEY = "dcaa-announcement-status-v1";
-
-type StatusMap = Record<string, AnnouncementStatus>;
-
 /**
- * Announcements are derived live from the roadmap, so a feature moving to
- * Production/Completed is picked up automatically. Only the review status is
- * persisted — new sprints therefore always appear as Draft.
+ * Announcements are derived live from the roadmap. Review status is persisted in Supabase.
  */
 export function useAnnouncements() {
   const { items } = useRoadmap();
-  const [statuses, setStatuses] = useState<StatusMap>({});
+  const { isAuthenticated } = useAuth();
+  const [statuses, setStatuses] = useState<AnnouncementStatusMap>({});
+  const [statusLoading, setStatusLoading] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setStatuses(JSON.parse(raw) as StatusMap);
-    } catch {
-      /* ignore */
+    if (!isAuthenticated) {
+      setStatuses({});
+      return;
     }
-  }, []);
+    let cancelled = false;
+    setStatusLoading(true);
+    fetchAnnouncementStatuses()
+      .then((map) => {
+        if (!cancelled) setStatuses(map);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          toast.error(err instanceof Error ? err.message : "Could not load announcement statuses");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setStatusLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   const setStatus = useCallback((key: string, status: AnnouncementStatus) => {
-    setStatuses((prev) => {
-      const next = { ...prev, [key]: status };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
+    setStatuses((prev) => ({ ...prev, [key]: status }));
+    void upsertAnnouncementStatus(key, status).catch((err) => {
+      toast.error(err instanceof Error ? err.message : "Could not save announcement status");
     });
   }, []);
 
@@ -45,5 +58,5 @@ export function useAnnouncements() {
     [items, statuses],
   );
 
-  return { announcements, setStatus };
+  return { announcements, setStatus, statusLoading };
 }

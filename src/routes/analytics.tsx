@@ -8,9 +8,9 @@ import { useRoadmap } from "@/lib/roadmap/store";
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics — DCAA Project Roadmap" },
-      { name: "description", content: "Completion, delivery readiness and status analytics for the DCAA SAFe roadmap." },
-      { property: "og:title", content: "Analytics — DCAA Project Roadmap" },
+      { title: "Analytics — DTP— Roadmap" },
+      { name: "description", content: "Completion, delivery readiness and status analytics for the DTP SAFe roadmap." },
+      { property: "og:title", content: "Analytics — DTP— Roadmap" },
       { property: "og:description", content: "Roadmap completion, module mix, delays and delivery readiness." },
     ],
   }),

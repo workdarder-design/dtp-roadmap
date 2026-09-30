@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { RoadmapProvider } from "@/lib/roadmap/store";
+import { AuthProvider } from "@/lib/auth/store";
+import { ProgramThemeProvider } from "@/components/theme/ProgramThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -79,10 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "DCAA Project Roadmap" },
-      { name: "description", content: "SAFe program roadmap management for DCAA." },
-      { property: "og:title", content: "DCAA Project Roadmap" },
-      { property: "og:description", content: "SAFe program roadmap management for DCAA." },
+      { title: "DTP— Roadmap" },
+      { name: "description", content: "SAFe program roadmap management for DTP." },
+      { property: "og:title", content: "DTP— Roadmap" },
+      { property: "og:description", content: "SAFe program roadmap management for DTP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -92,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/dcaa-logo.svg", type: "image/svg+xml" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -126,11 +128,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RoadmapProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="bottom-right" />
-      </RoadmapProvider>
+      <AuthProvider>
+        <ProgramThemeProvider>
+          <RoadmapProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <Toaster position="bottom-right" />
+          </RoadmapProvider>
+        </ProgramThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

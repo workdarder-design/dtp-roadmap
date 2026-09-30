@@ -19,16 +19,16 @@ import { useRoadmap } from "@/lib/roadmap/store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Roadmap — DCAA Project Roadmap" },
+      { title: "Roadmap — DTP— Roadmap" },
       {
         name: "description",
         content:
-          "SAFe program roadmap for DCAA: table, program train, timeline, kanban and analytics in one screen.",
+          "SAFe program roadmap for DTP: table, program train, timeline, kanban and analytics in one screen.",
       },
-      { property: "og:title", content: "Roadmap — DCAA Project Roadmap" },
+      { property: "og:title", content: "Roadmap — DTP— Roadmap" },
       {
         property: "og:description",
-        content: "Manage the DCAA SAFe roadmap: features, sprints, statuses and delivery dates.",
+        content: "Manage the DTP SAFe roadmap: features, sprints, statuses and delivery dates.",
       },
     ],
   }),
@@ -44,8 +44,27 @@ function RoadmapPage() {
 }
 
 function RoadmapWorkspace() {
-  const { filtered, isAdmin } = useRoadmap();
+  const { filtered, isAdmin, loading, error, refresh, hydrated } = useRoadmap();
   const [addOpen, setAddOpen] = useState(false);
+
+  if (!hydrated || loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading roadmap…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+        <p className="text-sm font-medium text-destructive">{error}</p>
+        <Button variant="outline" className="mt-3" onClick={() => void refresh()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

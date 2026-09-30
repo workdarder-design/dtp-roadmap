@@ -10,9 +10,9 @@ import { StateBadge } from "@/components/roadmap/StatusBadge";
 export const Route = createFileRoute("/reports")({
   head: () => ({
     meta: [
-      { title: "Reports — DCAA Project Roadmap" },
-      { name: "description", content: "Status reports and exports for the DCAA SAFe program roadmap." },
-      { property: "og:title", content: "Reports — DCAA Project Roadmap" },
+      { title: "Reports — DTP— Roadmap" },
+      { name: "description", content: "Status reports and exports for the DTP SAFe program roadmap." },
+      { property: "og:title", content: "Reports — DTP— Roadmap" },
       { property: "og:description", content: "Export and review roadmap status across sprints and modules." },
     ],
   }),
