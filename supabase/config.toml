@@ -1,0 +1,5 @@
+# Gateway JWT verification only accepts the legacy HS256 secret.
+# This project issues ES256 access tokens, so the function checks the
+# session itself (getUser + profiles.role = admin).
+[functions.admin-users]
+verify_jwt = false

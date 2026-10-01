@@ -1,9 +1,16 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,19 +18,25 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const publishableKey =
+      Deno.env.get("SUPABASE_ANON_KEY") ||
+      Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
+      req.headers.get("apikey") ||
+      "";
+    const secretKey =
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SECRET_KEY") || "";
+
+    if (!supabaseUrl || !publishableKey || !secretKey) {
+      return json({ error: "Server is missing Supabase credentials" }, 500);
+    }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Missing authorization" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Missing authorization" }, 401);
     }
 
-    const userClient = createClient(supabaseUrl, anonKey, {
+    const userClient = createClient(supabaseUrl, publishableKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const {
@@ -31,13 +44,10 @@ Deno.serve(async (req) => {
       error: userError,
     } = await userClient.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: userError?.message ?? "Unauthorized" }, 401);
     }
 
-    const adminDb = createClient(supabaseUrl, serviceRoleKey);
+    const adminDb = createClient(supabaseUrl, secretKey);
     const { data: profile, error: profileError } = await adminDb
       .from("profiles")
       .select("role")
@@ -45,10 +55,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (profileError || profile?.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: profileError?.message ?? "Admin access required" }, 403);
     }
 
     const body = await req.json();
@@ -63,10 +70,7 @@ Deno.serve(async (req) => {
       const displayName = String(body.displayName ?? "").trim() || email.split("@")[0];
 
       if (!email || password.length < 8) {
-        return new Response(JSON.stringify({ error: "Valid email and password (8+ chars) required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "Valid email and password (8+ chars) required" }, 400);
       }
 
       const { data, error } = await adminDb.auth.admin.createUser({
@@ -77,30 +81,22 @@ Deno.serve(async (req) => {
       });
 
       if (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: error.message }, 400);
       }
 
       if (data.user?.id) {
-        await adminDb.from("profiles").update({ role, display_name: displayName, email }).eq("id", data.user.id);
+        await adminDb
+          .from("profiles")
+          .update({ role, display_name: displayName, email })
+          .eq("id", data.user.id);
       }
 
-      return new Response(JSON.stringify({ userId: data.user?.id, email }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ userId: data.user?.id, email });
     }
 
-    return new Response(JSON.stringify({ error: "Unknown action" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: "Unknown action" }, 400);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Server error";
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: message }, 500);
   }
 });
